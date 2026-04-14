@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/LA/AppData/Roaming/Claude/local-agent-mode-sessions/skills-plugin/47de3f7f-c407-4c3e-b888-4d5f495de1c9/4676f85a-486b-4dfe-a8dc-bfebec053d78/skills/xlsx/**)",
+      "Bash(python -c ':*)",
+      "Bash(find \"C:\\\\LARG04\\\\03.Output\\\\09.Project\\\\03.BaiTapCuoiKhoa\\\\SRC\\\\04.Back-end/src/main/java\" -type f -name \"*.java\" -exec grep -l \"Response\\\\|Result\\\\|ApiResponse\" {} \\\\;)",
+      "Bash(where python3:*)",
+      "Bash(where py:*)",
+      "Bash(ls \"C:/Python\"*)",
+      "Read(//c/Users/LA/AppData/Local/Programs/**)",
+      "Bash(pip install:*)",
+      "Bash(python3 -c ':*)",
+      "Bash(ls \"C:/LARG04/03.Output/09.Project/03.BaiTapCuoiKhoa/SRC/04.Back-end/\"*.*)",
+      "Bash(./mvnw.cmd clean:*)",
+      "Bash(./mvnw.cmd spring-boot:run)",
+      "Bash(netstat -ano)",
+      "Bash(taskkill //PID 12064 //F)",
+      "Read(//c/Program Files/**)",
+      "Read(//c/ProgramData/**)",
+      "Read(//c/xampp/mysql/bin/**)",
+      "Read(//c/laragon/bin/**)",
+      "Bash(/c/xampp/mysql/bin/mysql.exe -u root -pLA.luvina1234 -h localhost -P 3306 user-manage -e ':*)",
+      "Bash(docker exec:*)"
+    ]
+  }
+}
