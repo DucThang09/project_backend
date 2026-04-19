@@ -7,11 +7,33 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+/**
+ * Repository để truy cập dữ liệu nhân viên.
+ * Cung cấp các phương thức truy vấn cơ bản và tùy chỉnh cho bảng employees.
+ *
+ * @author tdthang
+ * @version 1.0
+ * @since April 13, 2026
+ */
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
+    /**
+     * Tìm nhân viên theo ID đăng nhập.
+     *
+     * @param employeeLoginId ID đăng nhập của nhân viên
+     * @return Optional chứa Employee nếu tìm thấy, empty nếu không
+     */
     Optional<Employee> findByEmployeeLoginId(String employeeLoginId);
 
+    /**
+     * Đếm tổng số nhân viên theo điều kiện lọc.
+     * Loại trừ tài khoản admin khỏi kết quả.
+     *
+     * @param departmentId ID phòng ban để lọc (có thể null)
+     * @param employeeName Tên nhân viên để tìm kiếm (có thể null)
+     * @return Tổng số nhân viên phù hợp
+     */
     @Query(value = """
             SELECT COUNT(e.employee_id)
             FROM employees e

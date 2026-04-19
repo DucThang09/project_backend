@@ -1,3 +1,8 @@
+-- Migration V6: Seed sample employees data
+-- This migration inserts sample employee records for testing purposes
+-- Created on: April 13, 2026
+-- Author: tdthang
+
 INSERT INTO employees (
     department_id,
     employee_name,

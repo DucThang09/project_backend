@@ -9,32 +9,56 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.http.HttpStatus;
 
+/**
+ * Payload cho phản hồi danh sách nhân viên.
+ * Chứa dữ liệu nhân viên hoặc thông báo lỗi.
+ *
+ * @author tdthang
+ * @version 1.0
+ * @since April 13, 2026
+ */
 @Getter
 @Setter
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EmployeeResponse {
 
-    // code, totalRecords, employees dùng cho response thành công.
+    /** Mã trạng thái HTTP. */
     private Integer code;
+
+    /** Tổng số bản ghi phù hợp với điều kiện lọc. */
     private Long totalRecords;
+
+    /** Danh sách nhân viên. */
     private List<EmployeeDTO> employees;
 
-    // message dùng cho response lỗi hoặc các trường hợp cần trả mã message.
+    /** Thông báo lỗi hoặc mã message từ file properties. */
     private Message message;
 
+    /**
+     * Lớp inner chứa thông tin message.
+     * Sử dụng để trả về mã message và tham số từ file properties.
+     */
     @Getter
     @Setter
     @NoArgsConstructor
     @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Message {
-        // code là mã message trong file properties, params là tham số đi kèm.
+        /** Mã message trong file properties. */
         private String code;
+
+        /** Danh sách tham số để thay thế vào message. */
         private List<String> params;
     }
 
-    // Response thành công
+    /**
+     * Tạo response thành công với danh sách nhân viên.
+     *
+     * @param totalRecords Tổng số bản ghi
+     * @param employees Danh sách nhân viên
+     * @return EmployeeResponse với mã 200
+     */
     public static EmployeeResponse success(Long totalRecords, List<EmployeeDTO> employees) {
         EmployeeResponse response = new EmployeeResponse();
         response.setCode(HttpStatus.OK.value());
@@ -43,14 +67,27 @@ public class EmployeeResponse {
         return response;
     }
 
-    // Response thành công nhưng cần trả thêm mã message
+    /**
+     * Tạo response thành công với danh sách nhân viên và mã message.
+     *
+     * @param totalRecords Tổng số bản ghi
+     * @param employees Danh sách nhân viên
+     * @param messageCode Mã message từ properties
+     * @return EmployeeResponse với mã 200 và message
+     */
     public static EmployeeResponse success(Long totalRecords, List<EmployeeDTO> employees, String messageCode) {
         EmployeeResponse response = success(totalRecords, employees);
         response.setMessage(new Message(messageCode, List.of()));
         return response;
     }
 
-    // Response lỗi
+    /**
+     * Tạo response lỗi.
+     *
+     * @param errorCode Mã lỗi từ properties
+     * @param params Tham số cho message lỗi
+     * @return EmployeeResponse với mã 500 và message lỗi
+     */
     public static EmployeeResponse error(String errorCode, List<String> params) {
         EmployeeResponse response = new EmployeeResponse();
         response.setCode(HttpStatus.INTERNAL_SERVER_ERROR.value());

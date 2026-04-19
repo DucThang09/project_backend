@@ -1,3 +1,8 @@
+-- Migration V5: Create employee_certifications table
+-- This migration creates the junction table linking employees and certifications with scores and dates
+-- Created on: April 13, 2026
+-- Author: tdthang
+
 CREATE TABLE IF NOT EXISTS `employee_certifications` (
     employee_certification_id BIGINT NOT NULL AUTO_INCREMENT,
     employee_id BIGINT NOT NULL,
