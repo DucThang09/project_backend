@@ -9,6 +9,7 @@ package com.luvina.la.dto;
  * @since April 13, 2026
  */
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.time.LocalDate;
 import lombok.Getter;
 import lombok.Setter;
@@ -47,4 +48,64 @@ public class EmployeeDTO {
 
     /** Điểm số đạt được trong kỳ thi chứng chỉ. */
     private BigDecimal score;
+
+    /**
+     * Tạo DTO từ một dòng kết quả truy vấn native.
+     *
+     * @param row mảng Object chứa dữ liệu của một nhân viên
+     * @return EmployeeDTO đã được map
+     */
+    public static EmployeeDTO fromRow(Object[] row) {
+        EmployeeDTO dto = new EmployeeDTO();
+        dto.setEmployeeId(toLong(row[0]));
+        dto.setEmployeeName(toStringValue(row[1]));
+        dto.setEmployeeBirthDate(toLocalDate(row[2]));
+        dto.setDepartmentName(toStringValue(row[3]));
+        dto.setEmployeeEmail(toStringValue(row[4]));
+        dto.setEmployeeTelephone(toStringValue(row[5]));
+        dto.setCertificationName(toStringValue(row[6]));
+        dto.setEndDate(toLocalDate(row[7]));
+        dto.setScore(toBigDecimal(row[8]));
+        return dto;
+    }
+
+    /**
+     * Chuyển Object thành Long.
+     *
+     * @param value giá trị cần chuyển đổi
+     * @return giá trị Long hoặc null
+     */
+    private static Long toLong(Object value) {
+        return value == null ? null : ((Number) value).longValue();
+    }
+
+    /**
+     * Chuyển Object thành String.
+     *
+     * @param value giá trị cần chuyển đổi
+     * @return giá trị String hoặc null
+     */
+    private static String toStringValue(Object value) {
+        return value == null ? null : value.toString();
+    }
+
+    /**
+     * Chuyển Object thành LocalDate.
+     *
+     * @param value giá trị cần chuyển đổi
+     * @return LocalDate hoặc null
+     */
+    private static LocalDate toLocalDate(Object value) {
+        return (value instanceof Date date) ? date.toLocalDate() : null;
+    }
+
+    /**
+     * Chuyển Object thành BigDecimal.
+     *
+     * @param value giá trị cần chuyển đổi
+     * @return giá trị BigDecimal hoặc null
+     */
+    private static BigDecimal toBigDecimal(Object value) {
+        return value == null ? null : (BigDecimal) value;
+    }
 }

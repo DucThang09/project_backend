@@ -11,6 +11,8 @@ public class Constants {
 
     public static final String JWT_SECRET = "Luvina-Academe";
     public static final long JWT_EXPIRATION = 160 * 60 * 60; // 7 day
+    public static final int DEFAULT_OFFSET = 0;
+    public static final int DEFAULT_LIMIT = 20;
 
     // config endpoints public
     public static final String[] ENDPOINTS_PUBLIC = new String[] {
@@ -21,7 +23,9 @@ public class Constants {
 
     // config endpoints for USER role
     public static final String[] ENDPOINTS_WITH_ROLE = new String[] {
-            "/user/**"
+            "/user/**",
+            "/employee/**",
+            "/certification/**"
     };
 
     // user attributies put to token
