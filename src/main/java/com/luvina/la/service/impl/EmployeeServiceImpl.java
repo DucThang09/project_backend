@@ -14,23 +14,46 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import org.springframework.stereotype.Service;
 
+/**
+ * Implementation của EmployeeService.
+ * Xử lý logic nghiệp vụ liên quan đến nhân viên sử dụng truy vấn SQL native
+ * với sắp xếp động và phân trang.
+ *
+ * @author tdthang
+ * @version 1.0
+ * @since April 13, 2026
+ */
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
 
+    /** Repository để truy cập dữ liệu nhân viên. */
     private final EmployeeRepository employeeRepository;
 
+    /** EntityManager để thực hiện truy vấn SQL native. */
     @PersistenceContext
     private EntityManager entityManager;
 
+    /**
+     * Constructor để inject dependencies.
+     *
+     * @param employeeRepository Repository cho nhân viên
+     */
     public EmployeeServiceImpl(EmployeeRepository employeeRepository) {
         this.employeeRepository = employeeRepository;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Long getTotalEmployees(Long departmentId, String employeeName) {
         return employeeRepository.countTotalEmployees(departmentId, employeeName);
     }
 
+    /**
+     * {@inheritDoc}
+     * Triển khai sắp xếp động theo nhiều tiêu chí với ưu tiên.
+     */
     @Override
     public List<EmployeeDTO> getEmployees(
             Long departmentId,
@@ -60,6 +83,17 @@ public class EmployeeServiceImpl implements EmployeeService {
         return dtos;
     }
 
+    /**
+     * Thực hiện truy vấn SQL native để lấy danh sách nhân viên với sắp xếp động.
+     * Sử dụng subquery để lấy chứng chỉ "tốt nhất" cho mỗi nhân viên.
+     *
+     * @param departmentId ID phòng ban để lọc
+     * @param employeeName Tên nhân viên để tìm kiếm
+     * @param limit Số lượng bản ghi tối đa
+     * @param offset Vị trí bắt đầu
+     * @param orderBy Mệnh đề ORDER BY động
+     * @return Danh sách mảng Object chứa dữ liệu nhân viên
+     */
     @SuppressWarnings("unchecked")
     private List<Object[]> getEmployeesWithDynamicSort(
             Long departmentId,
@@ -98,7 +132,8 @@ public class EmployeeServiceImpl implements EmployeeService {
                   AND (:departmentId IS NULL OR e.department_id = :departmentId)
                   AND (:employeeName IS NULL OR TRIM(:employeeName) = ''
                        OR e.employee_name LIKE CONCAT('%', TRIM(:employeeName), '%'))
-                """ + orderBy;
+                order by e.employee_name,c.certification_name, ec.end_date
+                """;
 
         Query query = entityManager.createNativeQuery(sql);
         query.setParameter("departmentId", departmentId);
@@ -109,6 +144,15 @@ public class EmployeeServiceImpl implements EmployeeService {
         return query.getResultList();
     }
 
+    /**
+     * Xây dựng mệnh đề ORDER BY động dựa trên các tham số sắp xếp.
+     * Ưu tiên cột đang được sort lên đầu, sau đó là các cột khác theo thứ tự mặc định.
+     *
+     * @param ordEmployeeName Thứ tự sắp xếp tên nhân viên
+     * @param ordCertificationName Thứ tự sắp xếp tên chứng chỉ
+     * @param ordEndDate Thứ tự sắp xếp ngày kết thúc
+     * @return Mệnh đề ORDER BY hoàn chỉnh
+     */
     private String buildOrderByClause(String ordEmployeeName,
                                       String ordCertificationName,
                                       String ordEndDate) {
@@ -121,7 +165,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         int activeSortIndex = findActiveSortIndex(sortFields);
         // Lần đầu vào màn hình, spec yêu cầu sort mặc định theo employee_id tăng dần.
         if (activeSortIndex < 0) {
-            return "\nORDER BY e.employee_id ASC";
+            return "\nORDER BY e.employee_name ASC";
         }
 
         // Khi người dùng sort 1 cột, đưa cột đó lên ưu tiên đầu tiên.
@@ -139,14 +183,32 @@ public class EmployeeServiceImpl implements EmployeeService {
         return sb.toString();
     }
 
+    /**
+     * Chuẩn hóa hướng sắp xếp về ASC hoặc DESC.
+     *
+     * @param sort Chuỗi sắp xếp đầu vào
+     * @return "ASC" hoặc "DESC"
+     */
     private String normalizeSort(String sort) {
         return "DESC".equalsIgnoreCase(sort) ? "DESC" : "ASC";
     }
 
+    /**
+     * Kiểm tra xem chuỗi có chứa text không (không null và không rỗng).
+     *
+     * @param value Chuỗi cần kiểm tra
+     * @return true nếu có text, false nếu không
+     */
     private boolean hasText(String value) {
         return value != null && !value.trim().isEmpty();
     }
 
+    /**
+     * Tìm chỉ số của trường sắp xếp đang active (có giá trị sort).
+     *
+     * @param sortFields Danh sách các trường sắp xếp
+     * @return Chỉ số của trường đang active, -1 nếu không có
+     */
     private int findActiveSortIndex(List<SortField> sortFields) {
         for (int i = 0; i < sortFields.size(); i++) {
             if (hasText(sortFields.get(i).order())) {
@@ -157,6 +219,12 @@ public class EmployeeServiceImpl implements EmployeeService {
         return -1;
     }
 
+    /**
+     * Chuyển đổi mảng Object từ kết quả truy vấn thành EmployeeDTO.
+     *
+     * @param row Mảng Object chứa dữ liệu một hàng
+     * @return EmployeeDTO đã được map
+     */
     private EmployeeDTO mapToEmployeeDto(Object[] row) {
         EmployeeDTO dto = new EmployeeDTO();
         dto.setEmployeeId(toLong(row[0]));
@@ -171,22 +239,52 @@ public class EmployeeServiceImpl implements EmployeeService {
         return dto;
     }
 
+    /**
+     * Chuyển đổi Object thành Long.
+     *
+     * @param value Giá trị cần chuyển đổi
+     * @return Long value hoặc null
+     */
     private Long toLong(Object value) {
         return value == null ? null : ((Number) value).longValue();
     }
 
+    /**
+     * Chuyển đổi Object thành String.
+     *
+     * @param value Giá trị cần chuyển đổi
+     * @return String value hoặc null
+     */
     private String toStringValue(Object value) {
         return value == null ? null : value.toString();
     }
 
+    /**
+     * Chuyển đổi Object thành LocalDate.
+     *
+     * @param value Giá trị cần chuyển đổi (Date SQL)
+     * @return LocalDate hoặc null
+     */
     private LocalDate toLocalDate(Object value) {
         return (value instanceof Date date) ? date.toLocalDate() : null;
     }
 
+    /**
+     * Chuyển đổi Object thành BigDecimal.
+     *
+     * @param value Giá trị cần chuyển đổi
+     * @return BigDecimal value
+     */
     private BigDecimal toBigDecimal(Object value) {
         return (BigDecimal) value;
     }
 
+    /**
+     * Record để lưu trữ thông tin trường sắp xếp.
+     *
+     * @param column Tên cột trong SQL
+     * @param order Hướng sắp xếp (ASC/DESC)
+     */
     private record SortField(String column, String order) {
     }
 }

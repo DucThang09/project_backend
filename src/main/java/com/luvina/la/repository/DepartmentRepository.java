@@ -7,7 +7,12 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
- * Repository thao tác dữ liệu phòng ban.
+ * Repository để truy cập dữ liệu phòng ban.
+ * Cung cấp các phương thức truy vấn cơ bản và tùy chỉnh cho bảng departments.
+ *
+ * @author tdthang
+ * @version 1.0
+ * @since April 13, 2026
  */
 @Repository
 public interface DepartmentRepository extends JpaRepository<Department, Long> {

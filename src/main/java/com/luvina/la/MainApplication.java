@@ -1,8 +1,11 @@
 package com.luvina.la;
 /**
- * Copyright(C) 2026 Luvina Software Company
- * <p>
- * sample.java, April 13, 2026 tdthang
+ * Lớp chính khởi động ứng dụng Spring Boot.
+ * Cấu hình và chạy ứng dụng Employee Management System.
+ *
+ * @author tdthang
+ * @version 1.0
+ * @since April 13, 2026
  */
 import com.luvina.la.config.Constants;
 import com.luvina.la.config.DefaultProfileUtil;
@@ -18,17 +21,34 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
 
+/**
+ * Lớp chính của ứng dụng Spring Boot.
+ * Khởi động ứng dụng và kiểm tra cấu hình profile.
+ */
 @SpringBootApplication
 public class MainApplication implements InitializingBean {
 
+    /** Logger để ghi log thông tin khởi động ứng dụng. */
     private static final Logger log = LoggerFactory.getLogger(MainApplication.class);
 
+    /** Environment chứa các cấu hình của ứng dụng. */
     private final Environment env;
 
+    /**
+     * Constructor để inject Environment.
+     *
+     * @param env Environment của Spring
+     */
     public MainApplication(Environment env) {
         this.env = env;
     }
 
+    /**
+     * Kiểm tra cấu hình profile sau khi properties được set.
+     * Đảm bảo không chạy đồng thời cả dev và prod profile.
+     *
+     * @throws Exception nếu có lỗi trong quá trình kiểm tra
+     */
     @Override
     public void afterPropertiesSet() throws Exception {
         Collection<String> activeProfiles = Arrays.asList(env.getActiveProfiles());
@@ -39,6 +59,11 @@ public class MainApplication implements InitializingBean {
         }
     }
 
+    /**
+     * Phương thức main khởi động ứng dụng.
+     *
+     * @param args Các tham số dòng lệnh
+     */
     public static void main(String[] args) {
         SpringApplication app = new SpringApplication(MainApplication.class);
         DefaultProfileUtil.addDefaultProfile(app);
@@ -46,6 +71,11 @@ public class MainApplication implements InitializingBean {
         logApplicationStartup(env);
     }
 
+    /**
+     * Ghi log thông tin khởi động ứng dụng bao gồm URL truy cập.
+     *
+     * @param env Environment chứa cấu hình ứng dụng
+     */
     private static void logApplicationStartup(Environment env) {
         String protocol = "http";
         String serverPort = env.getProperty("server.port");

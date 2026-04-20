@@ -10,19 +10,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Service xử lý logic liên quan đến phòng ban.
+ * Implementation của DepartmentService.
+ * Xử lý logic nghiệp vụ liên quan đến phòng ban.
+ *
+ * @author tdthang
+ * @version 1.0
+ * @since April 13, 2026
  */
 @Service
 public class DepartmentServiceImpl implements DepartmentService {
 
+    /** Repository để truy cập dữ liệu phòng ban. */
     private final DepartmentRepository departmentRepository;
 
+    /**
+     * Constructor để inject dependencies.
+     *
+     * @param departmentRepository Repository cho phòng ban
+     */
     public DepartmentServiceImpl(DepartmentRepository departmentRepository) {
         this.departmentRepository = departmentRepository;
     }
 
     /**
-     * Lấy danh sách tất cả phòng ban
+     * {@inheritDoc}
+     * Lấy tất cả phòng ban và sắp xếp theo ID tăng dần.
      */
     @Override
     public List<DepartmentDTO> getDepartments() {

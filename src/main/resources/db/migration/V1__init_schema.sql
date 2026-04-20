@@ -1,3 +1,8 @@
+-- Migration V1: Initialize database schema
+-- This migration creates the initial tables for the employee management system
+-- Created on: April 13, 2026
+-- Author: tdthang
+
 SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS employee_certifications;
@@ -7,19 +12,14 @@ DROP TABLE IF EXISTS departments;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
+-- Create departments table
 CREATE TABLE departments (
     department_id BIGINT NOT NULL AUTO_INCREMENT,
     department_name VARCHAR(50) NOT NULL,
     PRIMARY KEY (department_id) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE certifications (
-    certification_id BIGINT NOT NULL AUTO_INCREMENT,
-    certification_name VARCHAR(50) NOT NULL,
-    certification_level INT NOT NULL,
-    PRIMARY KEY (certification_id) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
+-- Create employees table
 CREATE TABLE employees (
     employee_id BIGINT NOT NULL AUTO_INCREMENT,
     department_id BIGINT NOT NULL,
@@ -36,6 +36,7 @@ CREATE TABLE employees (
         FOREIGN KEY (department_id) REFERENCES departments (department_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- Create employee_certifications table
 CREATE TABLE employee_certifications (
     employee_certification_id BIGINT NOT NULL AUTO_INCREMENT,
     employee_id BIGINT NOT NULL,
@@ -50,6 +51,7 @@ CREATE TABLE employee_certifications (
         FOREIGN KEY (certification_id) REFERENCES certifications (certification_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- Insert initial data for departments
 INSERT INTO departments (department_id, department_name)
 VALUES
     (1, 'Admin'),
@@ -57,6 +59,7 @@ VALUES
     (3, 'QA'),
     (4, 'HR');
 
+-- Insert initial data for certifications
 INSERT INTO certifications (certification_id, certification_name, certification_level)
 VALUES
     (1, 'Trình độ tiếng Nhật cấp 1', 1),
@@ -65,6 +68,7 @@ VALUES
     (4, 'Trình độ tiếng Nhật cấp 4', 4),
     (5, 'Trình độ tiếng Nhật cấp 5', 5);
 
+-- Insert initial data for employees
 INSERT INTO employees (
     employee_id,
     department_id,
