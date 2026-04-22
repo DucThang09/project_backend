@@ -19,6 +19,14 @@ CREATE TABLE departments (
     PRIMARY KEY (department_id) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- Create certifications table
+CREATE TABLE certifications (
+    certification_id BIGINT NOT NULL AUTO_INCREMENT,
+    certification_name VARCHAR(255) NOT NULL,
+    certification_level INT NOT NULL,
+    PRIMARY KEY (certification_id) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 -- Create employees table
 CREATE TABLE employees (
     employee_id BIGINT NOT NULL AUTO_INCREMENT,

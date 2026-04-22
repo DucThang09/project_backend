@@ -68,6 +68,17 @@ public class EmployeeResponse {
     }
 
     /**
+     * Tạo response thành công không kèm dữ liệu danh sách.
+     *
+     * @return EmployeeResponse với mã 200
+     */
+    public static EmployeeResponse success() {
+        EmployeeResponse response = new EmployeeResponse();
+        response.setCode(HttpStatus.OK.value());
+        return response;
+    }
+
+    /**
      * Tạo response thành công với danh sách nhân viên và mã message.
      *
      * @param totalRecords Tổng số bản ghi

@@ -7,13 +7,18 @@ package com.luvina.la.controller;
 
 import com.luvina.la.dto.EmployeeDTO;
 import com.luvina.la.payload.EmployeeResponse;
+import com.luvina.la.payload.EmployeeValidationRequest;
 import com.luvina.la.service.EmployeeService;
+import com.luvina.la.validator.EmployeeValidator;
+import com.luvina.la.validator.EmployeeValidator.EmployeeValidationResult;
 import com.luvina.la.validator.EmployeeSearchValidator;
 import com.luvina.la.validator.EmployeeSearchValidator.EmployeeSearchValidationResult;
 import java.util.Collections;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,6 +33,7 @@ public class EmployeeController {
 
     private final EmployeeService employeeService;
     private final EmployeeSearchValidator employeeSearchValidator;
+    private final EmployeeValidator employeeValidator;
 
     /**
      * Creates an employee controller.
@@ -37,10 +43,12 @@ public class EmployeeController {
      */
     public EmployeeController(
             EmployeeService employeeService,
-            EmployeeSearchValidator employeeSearchValidator
+            EmployeeSearchValidator employeeSearchValidator,
+            EmployeeValidator employeeValidator
     ) {
         this.employeeService = employeeService;
         this.employeeSearchValidator = employeeSearchValidator;
+        this.employeeValidator = employeeValidator;
     }
 
     /**
@@ -104,6 +112,27 @@ public class EmployeeController {
             );
 
             return ResponseEntity.ok(EmployeeResponse.success(totalRecords, employees));
+        } catch (Exception exception) {
+            return ResponseEntity.ok(EmployeeResponse.error("ER023", Collections.emptyList()));
+        }
+    }
+
+    @PostMapping("/validate")
+    public ResponseEntity<EmployeeResponse> validateEmployeeInput(
+            @RequestBody(required = false) EmployeeValidationRequest request
+    ) {
+        try {
+            EmployeeValidationResult validationResult = employeeValidator.validate(request);
+            if (!validationResult.isValid()) {
+                return ResponseEntity.ok(
+                        EmployeeResponse.error(
+                                validationResult.getErrorCode(),
+                                validationResult.getErrorParams()
+                        )
+                );
+            }
+
+            return ResponseEntity.ok(EmployeeResponse.success());
         } catch (Exception exception) {
             return ResponseEntity.ok(EmployeeResponse.error("ER023", Collections.emptyList()));
         }
