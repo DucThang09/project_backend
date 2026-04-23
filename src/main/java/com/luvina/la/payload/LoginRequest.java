@@ -1,17 +1,13 @@
 package com.luvina.la.payload;
 /**
- * Payload cho yêu cầu đăng nhập.
- * Chứa thông tin xác thực từ client.
- *
- * @author tdthang
- * @version 1.0
- * @since April 13, 2026
+ * Copyright(C) 2026 Luvina Software Company
+ * <p>
+ * EmployeeController.java, April 13, 2026 tdthang
  */
 import lombok.Data;
 
 /**
- * Lớp chứa thông tin đăng nhập gửi từ client.
- * Bao gồm tên đăng nhập và mật khẩu.
+ * Payload nhận thông tin đăng nhập từ client.
  */
 @Data
 public class LoginRequest {

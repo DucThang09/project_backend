@@ -1,5 +1,9 @@
 package com.luvina.la.repository;
-
+/**
+ * Copyright(C) 2026 Luvina Software Company
+ * <p>
+ * EmployeeController.java, April 13, 2026 tdthang
+ */
 import com.luvina.la.entity.Department;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

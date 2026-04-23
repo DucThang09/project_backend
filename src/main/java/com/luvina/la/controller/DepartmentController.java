@@ -15,26 +15,35 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Controller xử lý API phòng ban. */
+/**
+ * Controller xử lý API phòng ban.
+ */
 @RestController
 @RequestMapping("/user")
 public class DepartmentController {
 
     private final DepartmentService departmentService;
 
-    /** Khởi tạo controller. */
+    /**
+     * Constructor để inject service phòng ban.
+     *
+     * @param departmentService service xử lý nghiệp vụ phòng ban
+     */
     public DepartmentController(DepartmentService departmentService) {
         this.departmentService = departmentService;
     }
 
-    /** Lấy danh sách phòng ban. */
+    /**
+     * Lấy danh sách phòng ban.
+     *
+     * @return response chứa danh sách phòng ban hoặc lỗi hệ thống
+     */
     @GetMapping("/departments")
     public ResponseEntity<DepartmentResponse> getDepartments() {
         try {
             List<DepartmentDTO> departments = departmentService.getDepartments();
             return ResponseEntity.ok(DepartmentResponse.success(departments));
         } catch (Exception exception) {
-            /** Trả lỗi hệ thống. */
             return ResponseEntity.ok(
                     DepartmentResponse.error("ER023", Collections.emptyList())
             );

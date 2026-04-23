@@ -1,11 +1,8 @@
 package com.luvina.la.entity;
 /**
- * Entity đại diện cho bảng mối quan hệ giữa nhân viên và chứng chỉ.
- * Lưu trữ thông tin về chứng chỉ mà nhân viên sở hữu cùng với ngày cấp và điểm số.
- *
- * @author tdthang
- * @version 1.0
- * @since April 13, 2026
+ * Copyright(C) 2026 Luvina Software Company
+ * <p>
+ * EmployeeController.java, April 13, 2026 tdthang
  */
 import java.io.Serializable;
 import java.math.BigDecimal;

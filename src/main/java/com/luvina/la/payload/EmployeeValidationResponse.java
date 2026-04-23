@@ -5,7 +5,6 @@ package com.luvina.la.payload;
  * EmployeeController.java, April 13, 2026 tdthang
  */
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.luvina.la.dto.CertificationDTO;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,25 +13,22 @@ import lombok.Setter;
 import org.springframework.http.HttpStatus;
 
 /**
- * Payload trả về cho API danh sách chứng chỉ.
+ * Payload trả về cho API validate/add/update employee.
  */
 @Getter
 @Setter
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class CertificationResponse {
+public class EmployeeValidationResponse {
 
     /** Mã trạng thái HTTP. */
     private Integer code;
 
-    /** Danh sách chứng chỉ. */
-    private List<CertificationDTO> certifications;
-
-    /** Message lỗi hoặc mã message trả về từ backend. */
+    /** Message lỗi trả về khi request không hợp lệ. */
     private Message message;
 
     /**
-     * Inner class chứa mã message và danh sách tham số.
+     * Inner class chứa mã lỗi và tham số để format message.
      */
     @Getter
     @Setter
@@ -45,15 +41,13 @@ public class CertificationResponse {
     }
 
     /**
-     * Tạo response thành công với danh sách chứng chỉ.
+     * Tạo response thành công.
      *
-     * @param certifications danh sách chứng chỉ
      * @return response với mã 200
      */
-    public static CertificationResponse success(List<CertificationDTO> certifications) {
-        CertificationResponse response = new CertificationResponse();
+    public static EmployeeValidationResponse success() {
+        EmployeeValidationResponse response = new EmployeeValidationResponse();
         response.setCode(HttpStatus.OK.value());
-        response.setCertifications(certifications);
         return response;
     }
 
@@ -64,8 +58,8 @@ public class CertificationResponse {
      * @param params tham số dùng để format message
      * @return response với mã 500 và message lỗi
      */
-    public static CertificationResponse error(String errorCode, List<String> params) {
-        CertificationResponse response = new CertificationResponse();
+    public static EmployeeValidationResponse error(String errorCode, List<String> params) {
+        EmployeeValidationResponse response = new EmployeeValidationResponse();
         response.setCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
         response.setMessage(new Message(errorCode, params));
         return response;

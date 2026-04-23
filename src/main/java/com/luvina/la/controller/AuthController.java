@@ -10,6 +10,9 @@ import com.luvina.la.config.jwt.JwtTokenProvider;
 import com.luvina.la.config.jwt.UserDetailsServiceImpl;
 import com.luvina.la.payload.LoginRequest;
 import com.luvina.la.payload.LoginResponse;
+import java.util.HashMap;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -25,13 +28,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Controller xử lý các API xác thực người dùng.
- * Bao gồm đăng nhập và quản lý token JWT.
  */
 @RestController
 public class AuthController {
@@ -41,6 +39,13 @@ public class AuthController {
     final AuthenticationManager authenticationManager;
     final UserDetailsServiceImpl userDetailsService;
 
+    /**
+     * Constructor để inject các dependency phục vụ xác thực và tạo JWT.
+     *
+     * @param authenticationManager component xác thực username/password
+     * @param jwtTokenProvider component tạo JWT
+     * @param userDetailsService service load thông tin người dùng
+     */
     AuthController(AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider, UserDetailsServiceImpl userDetailsService) {
         this.authenticationManager = authenticationManager;
         this.tokenProvider = jwtTokenProvider;
@@ -49,11 +54,10 @@ public class AuthController {
 
     /**
      * API đăng nhập cho người dùng.
-     * Xác thực thông tin đăng nhập và trả về token JWT nếu thành công.
      *
-     * @param loginRequest Thông tin đăng nhập (username và password)
-     * @param request HttpServletRequest
-     * @return ResponseEntity chứa token JWT hoặc thông báo lỗi
+     * @param loginRequest thông tin đăng nhập từ client
+     * @param request request hiện tại
+     * @return response chứa JWT nếu thành công hoặc mã lỗi nếu thất bại
      */
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
@@ -74,17 +78,15 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse(errors));
         } catch (Exception ex) {
             log.warn(ex.getMessage());
-            // unknow error
             errors.put("code", "000");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new LoginResponse(errors));
         }
     }
 
     /**
-     * API kiểm tra tính hợp lệ của token JWT.
-     * Trả về thông báo xác nhận token hợp lệ.
+     * API kiểm tra token JWT còn hợp lệ.
      *
-     * @return Map chứa thông báo xác nhận
+     * @return map chứa thông báo xác nhận token hợp lệ
      */
     @RequestMapping("/test-auth")
     public Map<String, String> testAuth() {

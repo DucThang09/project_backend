@@ -1,11 +1,8 @@
 package com.luvina.la.mapper;
 /**
- * Mapper để chuyển đổi giữa Employee entity và EmployeeDTO.
- * Sử dụng MapStruct để tự động generate code mapping.
- *
- * @author tdthang
- * @version 1.0
- * @since April 13, 2026
+ * Copyright(C) 2026 Luvina Software Company
+ * <p>
+ * EmployeeController.java, April 13, 2026 tdthang
  */
 import com.luvina.la.dto.EmployeeDTO;
 import com.luvina.la.entity.Employee;

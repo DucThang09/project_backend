@@ -1,12 +1,17 @@
 package com.luvina.la.payload;
-
+/**
+ * Copyright(C) 2026 Luvina Software Company
+ * <p>
+ * EmployeeController.java, April 13, 2026 tdthang
+ */
 import lombok.Data;
 
 /**
- * Payload validate-only dùng chung cho add/edit employee.
+ * Payload dùng chung cho validate, thêm mới và cập nhật nhân viên.
  */
 @Data
 public class EmployeeValidationRequest {
+    private String employeeId;
     private String employeeLoginId;
     private String departmentId;
     private String employeeName;

@@ -1,41 +1,34 @@
 package com.luvina.la.service;
 /**
- * Giao diện dịch vụ xử lý nghiệp vụ liên quan đến nhân viên.
- * Cung cấp các phương thức để truy vấn và thao tác dữ liệu nhân viên.
- *
- * @author tdthang
- * @version 1.0
- * @since April 13, 2026
+ * Copyright(C) 2026 Luvina Software Company
+ * <p>
+ * EmployeeController.java, April 13, 2026 tdthang
  */
 import com.luvina.la.dto.EmployeeDTO;
+import com.luvina.la.payload.EmployeeValidationRequest;
 import java.util.List;
 
-/**
- * Service xử lý nghiệp vụ nhân viên.
- * Định nghĩa các phương thức để lấy danh sách nhân viên và đếm số lượng.
- */
 public interface EmployeeService {
-
     /**
-     * Đếm tổng số nhân viên theo điều kiện lọc.
+     * Đếm tổng số nhân viên theo điều kiện tìm kiếm hiện tại.
      *
-     * @param departmentId ID phòng ban (có thể null để lấy tất cả)
-     * @param employeeName Tên nhân viên để tìm kiếm (có thể null)
-     * @return Tổng số nhân viên phù hợp với điều kiện
+     * @param departmentId ID phòng ban cần lọc
+     * @param employeeName tên nhân viên cần tìm
+     * @return tổng số bản ghi phù hợp
      */
     Long getTotalEmployees(Long departmentId, String employeeName);
 
     /**
-     * Lấy danh sách nhân viên theo điều kiện lọc và sắp xếp.
+     * Lấy danh sách nhân viên theo điều kiện tìm kiếm, sắp xếp và phân trang.
      *
-     * @param departmentId ID phòng ban (có thể null để lấy tất cả)
-     * @param employeeName Tên nhân viên để tìm kiếm (có thể null)
-     * @param ordEmployeeName Thứ tự sắp xếp theo tên nhân viên (ASC/DESC)
-     * @param ordCertificationName Thứ tự sắp xếp theo tên chứng chỉ (ASC/DESC)
-     * @param ordEndDate Thứ tự sắp xếp theo ngày kết thúc chứng chỉ (ASC/DESC)
-     * @param offset Vị trí bắt đầu lấy dữ liệu (phân trang)
-     * @param limit Số lượng bản ghi tối đa trả về
-     * @return Danh sách EmployeeDTO phù hợp với điều kiện
+     * @param departmentId ID phòng ban cần lọc
+     * @param employeeName tên nhân viên cần tìm
+     * @param ordEmployeeName thứ tự sắp xếp theo tên nhân viên
+     * @param ordCertificationName thứ tự sắp xếp theo tên chứng chỉ
+     * @param ordEndDate thứ tự sắp xếp theo ngày hết hạn chứng chỉ
+     * @param offset vị trí bắt đầu lấy dữ liệu
+     * @param limit số bản ghi tối đa cần lấy
+     * @return danh sách nhân viên phù hợp
      */
     List<EmployeeDTO> getEmployees(
             Long departmentId,
@@ -46,4 +39,19 @@ public interface EmployeeService {
             Integer offset,
             Integer limit
     );
+
+    /**
+     * Thêm mới nhân viên và thông tin chứng chỉ nếu có.
+     *
+     * @param request dữ liệu nhân viên đã được validate
+     */
+    void addEmployee(EmployeeValidationRequest request);
+
+    /**
+     * Cập nhật nhân viên theo ID và ghi đè lại thông tin chứng chỉ hiện tại.
+     *
+     * @param employeeId ID nhân viên cần cập nhật
+     * @param request dữ liệu nhân viên đã được validate
+     */
+    void updateEmployee(Long employeeId, EmployeeValidationRequest request);
 }

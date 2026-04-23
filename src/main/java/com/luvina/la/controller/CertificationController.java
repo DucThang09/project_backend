@@ -1,5 +1,9 @@
 package com.luvina.la.controller;
-
+/**
+ * Copyright(C) 2026 Luvina Software Company
+ * <p>
+ * EmployeeController.java, April 13, 2026 tdthang
+ */
 import com.luvina.la.dto.CertificationDTO;
 import com.luvina.la.payload.CertificationResponse;
 import com.luvina.la.service.CertificationService;
@@ -20,9 +24,9 @@ public class CertificationController {
     private final CertificationService certificationService;
 
     /**
-     * Khởi tạo controller.
+     * Constructor để inject service chứng chỉ.
      *
-     * @param certificationService service chứng chỉ
+     * @param certificationService service xử lý nghiệp vụ chứng chỉ
      */
     public CertificationController(CertificationService certificationService) {
         this.certificationService = certificationService;

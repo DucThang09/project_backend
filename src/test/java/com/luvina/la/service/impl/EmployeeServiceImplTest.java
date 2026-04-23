@@ -1,22 +1,33 @@
 package com.luvina.la.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.luvina.la.config.Constants;
 import com.luvina.la.dto.EmployeeDTO;
+import com.luvina.la.entity.Certification;
+import com.luvina.la.entity.Department;
+import com.luvina.la.entity.Employee;
+import com.luvina.la.payload.EmployeeValidationRequest;
+import com.luvina.la.repository.CertificationRepository;
+import com.luvina.la.repository.DepartmentRepository;
+import com.luvina.la.repository.EmployeeCertificationRepository;
 import com.luvina.la.repository.EmployeeRepository;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
 class EmployeeServiceImplTest {
@@ -24,11 +35,29 @@ class EmployeeServiceImplTest {
     @Mock
     private EmployeeRepository employeeRepository;
 
+    @Mock
+    private DepartmentRepository departmentRepository;
+
+    @Mock
+    private CertificationRepository certificationRepository;
+
+    @Mock
+    private EmployeeCertificationRepository employeeCertificationRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     private EmployeeServiceImpl employeeService;
 
     @BeforeEach
     void setUp() {
-        employeeService = new EmployeeServiceImpl(employeeRepository);
+        employeeService = new EmployeeServiceImpl(
+                employeeRepository,
+                departmentRepository,
+                certificationRepository,
+                employeeCertificationRepository,
+                passwordEncoder
+        );
     }
 
     @Test
@@ -93,5 +122,67 @@ class EmployeeServiceImplTest {
                 10,
                 5
         );
+    }
+
+    @Test
+    void shouldAddEmployeeAndCertification() {
+        EmployeeValidationRequest request = createRequest();
+        Department department = new Department();
+        department.setDepartmentId(2L);
+        Certification certification = new Certification();
+        certification.setCertificationId(1L);
+        Employee savedEmployee = new Employee();
+        savedEmployee.setEmployeeId(30L);
+
+        when(departmentRepository.findById(2L)).thenReturn(Optional.of(department));
+        when(certificationRepository.findById(1L)).thenReturn(Optional.of(certification));
+        when(passwordEncoder.encode("secret123")).thenReturn("encoded-password");
+        when(employeeRepository.save(any(Employee.class))).thenReturn(savedEmployee);
+
+        employeeService.addEmployee(request);
+
+        verify(employeeRepository).save(any(Employee.class));
+        verify(employeeCertificationRepository).save(any());
+    }
+
+    @Test
+    void shouldUpdateEmployeeAndDeleteCertificationWhenCertificationIsBlank() {
+        EmployeeValidationRequest request = createRequest();
+        request.setCertificationId("");
+        request.setCertificationStartDate(null);
+        request.setCertificationEndDate(null);
+        request.setScore("");
+
+        Department department = new Department();
+        department.setDepartmentId(2L);
+        Employee employee = new Employee();
+        employee.setEmployeeId(30L);
+
+        when(employeeRepository.findById(30L)).thenReturn(Optional.of(employee));
+        when(departmentRepository.findById(2L)).thenReturn(Optional.of(department));
+        when(passwordEncoder.encode("secret123")).thenReturn("encoded-password");
+
+        employeeService.updateEmployee(30L, request);
+
+        verify(employeeCertificationRepository).deleteByEmployeeEmployeeId(30L);
+        verify(certificationRepository, never()).findById(any());
+    }
+
+    private EmployeeValidationRequest createRequest() {
+        EmployeeValidationRequest request = new EmployeeValidationRequest();
+        request.setDepartmentId("2");
+        request.setEmployeeName("Test User");
+        request.setEmployeeNameKana("テストユーザー");
+        request.setEmployeeBirthDate("2000-01-01");
+        request.setEmployeeEmail("test@example.com");
+        request.setEmployeeTelephone("0123456789");
+        request.setEmployeeLoginId("user01");
+        request.setEmployeeLoginPassword("secret123");
+        request.setEmployeeLoginPasswordConfirm("secret123");
+        request.setCertificationId("1");
+        request.setCertificationStartDate("2020-01-01");
+        request.setCertificationEndDate("2022-01-01");
+        request.setScore("850");
+        return request;
     }
 }

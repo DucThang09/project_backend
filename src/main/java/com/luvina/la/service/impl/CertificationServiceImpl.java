@@ -1,5 +1,9 @@
 package com.luvina.la.service.impl;
-
+/**
+ * Copyright(C) 2026 Luvina Software Company
+ * <p>
+ * EmployeeController.java, April 13, 2026 tdthang
+ */
 import com.luvina.la.dto.CertificationDTO;
 import com.luvina.la.entity.Certification;
 import com.luvina.la.repository.CertificationRepository;
@@ -27,11 +31,14 @@ public class CertificationServiceImpl implements CertificationService {
     }
 
     /**
-     * {@inheritDoc}
+     *
+     * @return
      */
     @Override
     public List<CertificationDTO> getCertifications() {
         List<Certification> certifications = certificationRepository.findAllByOrderByCertificationIdAsc();
+
+        // Chuyển entity sang DTO để controller trả về đúng dữ liệu cần hiển thị.
         List<CertificationDTO> dtos = new ArrayList<>(certifications.size());
 
         for (Certification certification : certifications) {

@@ -1,19 +1,16 @@
 package com.luvina.la.payload;
 /**
- * Payload cho phản hồi đăng nhập.
- * Chứa token JWT hoặc thông báo lỗi.
- *
- * @author tdthang
- * @version 1.0
- * @since April 13, 2026
+ * Copyright(C) 2026 Luvina Software Company
+ * <p>
+ * EmployeeController.java, April 13, 2026 tdthang
  */
 import java.util.HashMap;
 import java.util.Map;
 import lombok.Data;
 
 /**
- * Lớp chứa phản hồi từ server sau khi xử lý đăng nhập.
- * Có thể chứa token truy cập hoặc danh sách lỗi.
+ * Payload trả về sau khi xử lý đăng nhập.
+ * Có thể chứa access token hoặc danh sách lỗi.
  */
 @Data
 public class LoginResponse {
@@ -21,16 +18,16 @@ public class LoginResponse {
     /** Token truy cập JWT. */
     private String accessToken;
 
-    /** Loại token (luôn là "Bearer"). */
+    /** Loại token, mặc định là Bearer. */
     private String tokenType;
 
-    /** Map chứa các thông báo lỗi nếu đăng nhập thất bại. */
+    /** Danh sách lỗi khi đăng nhập thất bại. */
     private Map<String, String> errors = new HashMap<>();
 
     /**
-     * Constructor cho trường hợp đăng nhập thành công.
+     * Constructor dùng cho trường hợp đăng nhập thành công.
      *
-     * @param accessToken Token JWT được tạo
+     * @param accessToken token JWT được tạo
      */
     public LoginResponse(String accessToken) {
         this.accessToken = accessToken;
@@ -38,12 +35,11 @@ public class LoginResponse {
     }
 
     /**
-     * Constructor cho trường hợp đăng nhập thất bại.
+     * Constructor dùng cho trường hợp đăng nhập thất bại.
      *
-     * @param errors Map chứa thông báo lỗi
+     * @param errors danh sách lỗi trả về cho client
      */
     public LoginResponse(Map<String, String> errors) {
         this.errors = errors;
     }
-
 }

@@ -14,8 +14,8 @@ import org.junit.jupiter.api.Test;
 
 class EmployeeSearchValidatorTest {
 
-    private static final String OFFSET_PARAM_NAME = "ã‚ªãƒ•ã‚»ãƒƒãƒˆ";
-    private static final String LIMIT_PARAM_NAME = "ãƒªãƒŸãƒƒãƒˆ";
+    private static final String OFFSET_PARAM_NAME = "\u30aa\u30d5\u30bb\u30c3\u30c8";
+    private static final String LIMIT_PARAM_NAME = "\u30ea\u30df\u30c3\u30c8";
 
     private EmployeeSearchValidator validator;
 

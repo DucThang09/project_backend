@@ -1,11 +1,8 @@
 package com.luvina.la.entity;
 /**
- * Entity đại diện cho bảng phòng ban trong cơ sở dữ liệu.
- * Lưu trữ thông tin về các phòng ban trong công ty.
- *
- * @author tdthang
- * @version 1.0
- * @since April 13, 2026
+ * Copyright(C) 2026 Luvina Software Company
+ * <p>
+ * EmployeeController.java, April 13, 2026 tdthang
  */
 import java.io.Serializable;
 import javax.persistence.Column;

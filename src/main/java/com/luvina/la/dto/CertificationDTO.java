@@ -1,5 +1,9 @@
 package com.luvina.la.dto;
-
+/**
+ * Copyright(C) 2026 Luvina Software Company
+ * <p>
+ * EmployeeController.java, April 13, 2026 tdthang
+ */
 import lombok.Getter;
 import lombok.Setter;
 

@@ -1,5 +1,9 @@
 package com.luvina.la.repository;
-
+/**
+ * Copyright(C) 2026 Luvina Software Company
+ * <p>
+ * EmployeeController.java, April 13, 2026 tdthang
+ */
 import com.luvina.la.entity.Employee;
 import java.util.List;
 import java.util.Optional;
@@ -9,31 +13,27 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /**
- * Repository d? truy c?p d? li?u nhân viên.
- * Cung c?p các phuong th?c truy v?n co b?n và truy v?n danh sách nhân viên cho b?ng employees.
- *
- * @author tdthang
- * @version 1.0
- * @since April 13, 2026
+ * Repository truy cập dữ liệu nhân viên.
+ * Cung cấp các truy vấn phục vụ validate login, đếm tổng số bản ghi và lấy danh sách nhân viên.
  */
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     /**
-     * Tìm nhân viên theo ID dang nh?p.
+     * Tìm nhân viên theo login ID.
      *
-     * @param employeeLoginId ID dang nh?p c?a nhân viên
-     * @return Optional ch?a Employee n?u tìm th?y, empty n?u không
+     * @param employeeLoginId login ID của nhân viên
+     * @return Optional chứa Employee nếu tìm thấy, ngược lại trả về rỗng
      */
     Optional<Employee> findByEmployeeLoginId(String employeeLoginId);
 
     /**
-     * Ð?m t?ng s? nhân viên theo di?u ki?n l?c.
-     * Lo?i tr? tài kho?n admin kh?i k?t qu?.
+     * Đếm tổng số nhân viên theo điều kiện lọc.
+     * Loại trừ tài khoản admin khỏi kết quả.
      *
-     * @param departmentId ID phòng ban d? l?c
-     * @param employeeName Tên nhân viên d? tìm ki?m
-     * @return T?ng s? nhân viên phù h?p
+     * @param departmentId ID phòng ban cần lọc
+     * @param employeeName tên nhân viên cần tìm kiếm
+     * @return tổng số nhân viên phù hợp
      */
     @Query(value = """
             SELECT COUNT(e.employee_id)
@@ -49,16 +49,16 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
                              @Param("employeeName") String employeeName);
 
     /**
-     * L?y danh sách nhân viên v?i di?u ki?n l?c, s?p x?p và phân trang.
+     * Lấy danh sách nhân viên với điều kiện lọc, sắp xếp và phân trang.
      *
-     * @param departmentId ID phòng ban d? l?c
-     * @param employeeName Tên nhân viên d? tìm ki?m
-     * @param ordEmployeeName Th? t? s?p x?p theo tên nhân viên
-     * @param ordCertificationName Th? t? s?p x?p theo tên ch?ng ch?
-     * @param ordEndDate Th? t? s?p x?p theo ngày h?t h?n
-     * @param limit S? lu?ng b?n ghi t?i da
-     * @param offset V? trí b?t d?u
-     * @return Danh sách dòng d? li?u thô t? truy v?n native
+     * @param departmentId ID phòng ban cần lọc
+     * @param employeeName tên nhân viên cần tìm kiếm
+     * @param ordEmployeeName thứ tự sắp xếp theo tên nhân viên
+     * @param ordCertificationName thứ tự sắp xếp theo tên chứng chỉ
+     * @param ordEndDate thứ tự sắp xếp theo ngày hết hạn
+     * @param limit số lượng bản ghi tối đa
+     * @param offset vị trí bắt đầu
+     * @return danh sách dòng dữ liệu thô từ truy vấn native
      */
     @Query(value = """
             SELECT

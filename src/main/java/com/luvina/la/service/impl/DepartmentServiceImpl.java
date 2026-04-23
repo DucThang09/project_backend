@@ -1,5 +1,9 @@
 package com.luvina.la.service.impl;
-
+/**
+ * Copyright(C) 2026 Luvina Software Company
+ * <p>
+ * EmployeeController.java, April 13, 2026 tdthang
+ */
 import com.luvina.la.dto.DepartmentDTO;
 import com.luvina.la.entity.Department;
 import com.luvina.la.repository.DepartmentRepository;
@@ -9,14 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Implementation của DepartmentService.
- * Xử lý logic nghiệp vụ liên quan đến phòng ban.
- *
- * @author tdthang
- * @version 1.0
- * @since April 13, 2026
- */
+
 @Service
 public class DepartmentServiceImpl implements DepartmentService {
 
@@ -24,7 +21,6 @@ public class DepartmentServiceImpl implements DepartmentService {
     private final DepartmentRepository departmentRepository;
 
     /**
-     * Constructor để inject dependencies.
      *
      * @param departmentRepository Repository cho phòng ban
      */
@@ -33,13 +29,13 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     /**
-     * {@inheritDoc}
      * Lấy tất cả phòng ban và sắp xếp theo ID tăng dần.
      */
     @Override
     public List<DepartmentDTO> getDepartments() {
         List<Department> departments = departmentRepository.findAllByOrderByDepartmentIdAsc();
 
+        // Chuyển entity sang DTO để trả dữ liệu gọn cho controller.
         List<DepartmentDTO> dtos = new ArrayList<>(departments.size());
 
         for (Department dept : departments) {

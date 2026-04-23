@@ -1,12 +1,8 @@
 package com.luvina.la.payload;
-
 /**
- * Payload cho phản hồi danh sách phòng ban.
- * Chứa dữ liệu phòng ban hoặc thông báo lỗi.
- *
- * @author tdthang
- * @version 1.0
- * @since April 13, 2026
+ * Copyright(C) 2026 Luvina Software Company
+ * <p>
+ * EmployeeController.java, April 13, 2026 tdthang
  */
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.luvina.la.dto.DepartmentDTO;
@@ -19,7 +15,6 @@ import org.springframework.http.HttpStatus;
 
 /**
  * Payload trả về cho API danh sách phòng ban.
- * Chứa danh sách phòng ban hoặc thông báo lỗi.
  */
 @Getter
 @Setter
@@ -33,12 +28,11 @@ public class DepartmentResponse {
     /** Danh sách phòng ban. */
     private List<DepartmentDTO> departments;
 
-    /** Thông báo lỗi hoặc mã message từ file properties. */
+    /** Message lỗi hoặc mã message trả về từ backend. */
     private Message message;
 
     /**
-     * Lớp inner chứa thông tin message.
-     * Sử dụng để trả về mã message và tham số từ file properties.
+     * Inner class chứa mã message và danh sách tham số.
      */
     @Getter
     @Setter
@@ -46,18 +40,15 @@ public class DepartmentResponse {
     @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Message {
-        /** Mã message trong file properties. */
         private String code;
-
-        /** Danh sách tham số để thay thế vào message. */
         private List<String> params;
     }
 
     /**
      * Tạo response thành công với danh sách phòng ban.
      *
-     * @param departments Danh sách phòng ban
-     * @return DepartmentResponse với mã 200
+     * @param departments danh sách phòng ban
+     * @return response với mã 200
      */
     public static DepartmentResponse success(List<DepartmentDTO> departments) {
         DepartmentResponse response = new DepartmentResponse();
@@ -69,9 +60,9 @@ public class DepartmentResponse {
     /**
      * Tạo response lỗi.
      *
-     * @param errorCode Mã lỗi từ properties
-     * @param params Tham số cho message lỗi
-     * @return DepartmentResponse với mã 500 và message lỗi
+     * @param errorCode mã lỗi
+     * @param params tham số dùng để format message
+     * @return response với mã 500 và message lỗi
      */
     public static DepartmentResponse error(String errorCode, List<String> params) {
         DepartmentResponse response = new DepartmentResponse();

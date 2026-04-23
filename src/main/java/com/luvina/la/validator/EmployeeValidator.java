@@ -1,5 +1,28 @@
 package com.luvina.la.validator;
+/**
+ * Copyright(C) 2026 Luvina Software Company
+ * <p>
+ * EmployeeController.java, April 13, 2026 tdthang
+ */
+import static com.luvina.la.config.Constants.ACCOUNT_NAME;
+import static com.luvina.la.config.Constants.ACCOUNT_NAME_PATTERN;
+import static com.luvina.la.config.Constants.BIRTH_DATE;
+import static com.luvina.la.config.Constants.CERTIFICATION;
+import static com.luvina.la.config.Constants.CERTIFICATION_END_DATE;
+import static com.luvina.la.config.Constants.CERTIFICATION_START_DATE;
+import static com.luvina.la.config.Constants.EMAIL;
+import static com.luvina.la.config.Constants.EMAIL_PATTERN;
+import static com.luvina.la.config.Constants.EMPLOYEE_NAME;
+import static com.luvina.la.config.Constants.EMPLOYEE_NAME_KANA;
+import static com.luvina.la.config.Constants.GROUP;
+import static com.luvina.la.config.Constants.HALF_WIDTH_PATTERN;
+import static com.luvina.la.config.Constants.KATAKANA_PATTERN;
+import static com.luvina.la.config.Constants.PASSWORD;
+import static com.luvina.la.config.Constants.POSITIVE_INTEGER_PATTERN;
+import static com.luvina.la.config.Constants.SCORE;
+import static com.luvina.la.config.Constants.TELEPHONE;
 
+import com.luvina.la.entity.Employee;
 import com.luvina.la.payload.EmployeeValidationRequest;
 import com.luvina.la.repository.CertificationRepository;
 import com.luvina.la.repository.DepartmentRepository;
@@ -9,39 +32,21 @@ import java.time.format.DateTimeParseException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 
-/**
- * Validates employee input shared by add/edit before the confirm screen.
- */
 @Component
 public class EmployeeValidator {
-
-    private static final String ACCOUNT_NAME = "アカウント名";
-    private static final String GROUP = "グループ";
-    private static final String EMPLOYEE_NAME = "氏名";
-    private static final String EMPLOYEE_NAME_KANA = "カタカナ氏名";
-    private static final String BIRTH_DATE = "生年月日";
-    private static final String EMAIL = "メールアドレス";
-    private static final String TELEPHONE = "電話番号";
-    private static final String PASSWORD = "パスワード";
-    private static final String PASSWORD_CONFIRM = "パスワード（確認）";
-    private static final String CERTIFICATION = "資格";
-    private static final String CERTIFICATION_START_DATE = "資格交付日";
-    private static final String CERTIFICATION_END_DATE = "失効日";
-    private static final String SCORE = "点数";
-
-    private static final Pattern ACCOUNT_NAME_PATTERN = Pattern.compile("^[A-Za-z_][A-Za-z0-9_]*$");
-    private static final Pattern KATAKANA_PATTERN = Pattern.compile("^[ァ-ヶー]+$");
-    private static final Pattern HALF_WIDTH_PATTERN = Pattern.compile("^[\\x20-\\x7E]+$");
-    private static final Pattern POSITIVE_INTEGER_PATTERN = Pattern.compile("^[1-9]\\d*$");
-    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
     private final EmployeeRepository employeeRepository;
     private final DepartmentRepository departmentRepository;
     private final CertificationRepository certificationRepository;
 
+    /**
+     *
+     * @param employeeRepository
+     * @param departmentRepository
+     * @param certificationRepository
+     */
     public EmployeeValidator(
             EmployeeRepository employeeRepository,
             DepartmentRepository departmentRepository,
@@ -55,7 +60,9 @@ public class EmployeeValidator {
     public EmployeeValidationResult validate(EmployeeValidationRequest request) {
         EmployeeValidationRequest safeRequest = request == null ? new EmployeeValidationRequest() : request;
 
+        // Kiểm tra trùng loginId khi thêm/sửa nhân viên.
         String employeeLoginId = trim(safeRequest.getEmployeeLoginId());
+        Long currentEmployeeId = parsePositiveLong(trim(safeRequest.getEmployeeId()));
         if (isEmpty(employeeLoginId)) {
             return EmployeeValidationResult.invalid("ER001", List.of(ACCOUNT_NAME));
         }
@@ -65,10 +72,14 @@ public class EmployeeValidator {
         if (!ACCOUNT_NAME_PATTERN.matcher(employeeLoginId).matches()) {
             return EmployeeValidationResult.invalid("ER019", Collections.emptyList());
         }
-        if (employeeRepository.findByEmployeeLoginId(employeeLoginId).isPresent()) {
+        Optional<Employee> existingEmployee = employeeRepository.findByEmployeeLoginId(employeeLoginId);
+        if (existingEmployee.isPresent()
+                && (currentEmployeeId == null
+                || !existingEmployee.get().getEmployeeId().equals(currentEmployeeId))) {
             return EmployeeValidationResult.invalid("ER003", List.of(ACCOUNT_NAME));
         }
 
+        // Kiểm tra phòng ban bắt buộc chọn và có tồn tại trong DB.
         String departmentId = trim(safeRequest.getDepartmentId());
         if (isEmpty(departmentId)) {
             return EmployeeValidationResult.invalid("ER002", List.of(GROUP));
@@ -81,6 +92,7 @@ public class EmployeeValidator {
             return EmployeeValidationResult.invalid("ER004", List.of(GROUP));
         }
 
+        // Kiểm tra các thông tin cơ bản của nhân viên.
         String employeeName = trim(safeRequest.getEmployeeName());
         if (isEmpty(employeeName)) {
             return EmployeeValidationResult.invalid("ER001", List.of(EMPLOYEE_NAME));
@@ -130,6 +142,7 @@ public class EmployeeValidator {
             return EmployeeValidationResult.invalid("ER008", List.of(TELEPHONE));
         }
 
+        // Backend chỉ kiểm tra mật khẩu; confirm password được xử lý ở frontend.
         String employeeLoginPassword = defaultString(safeRequest.getEmployeeLoginPassword());
         if (employeeLoginPassword.isEmpty()) {
             return EmployeeValidationResult.invalid("ER001", List.of(PASSWORD));
@@ -138,18 +151,13 @@ public class EmployeeValidator {
             return EmployeeValidationResult.invalid("ER007", List.of(PASSWORD, "8", "50"));
         }
 
-        String employeeLoginPasswordConfirm = defaultString(safeRequest.getEmployeeLoginPasswordConfirm());
-        if (employeeLoginPasswordConfirm.isEmpty()) {
-            return EmployeeValidationResult.invalid("ER001", List.of(PASSWORD_CONFIRM));
-        }
-        if (!employeeLoginPassword.equals(employeeLoginPasswordConfirm)) {
-            return EmployeeValidationResult.invalid("ER017", Collections.emptyList());
-        }
-
+        // Nếu chưa chọn chứng chỉ thì bỏ qua toàn bộ validation của phần chứng chỉ.
         String certificationId = trim(safeRequest.getCertificationId());
         if (isEmpty(certificationId)) {
             return EmployeeValidationResult.valid();
         }
+
+        // Khi đã chọn chứng chỉ thì các thông tin liên quan phải bắt buộc chọn.
         Long certificationIdValue = parsePositiveLong(certificationId);
         if (certificationIdValue == null) {
             return EmployeeValidationResult.invalid("ER018", List.of(CERTIFICATION));
@@ -179,6 +187,7 @@ public class EmployeeValidator {
             return EmployeeValidationResult.invalid("ER012", Collections.emptyList());
         }
 
+        // Điểm phải là số nguyên dương khi có chọn chứng chỉ.
         String score = trim(safeRequest.getScore());
         if (isEmpty(score)) {
             return EmployeeValidationResult.invalid("ER001", List.of(SCORE));
@@ -194,6 +203,7 @@ public class EmployeeValidator {
         return value == null ? "" : value.trim();
     }
 
+    // Giữ nguyên chuỗi gốc để tránh null khi kiểm tra password.
     private String defaultString(String value) {
         return value == null ? "" : value;
     }
@@ -226,7 +236,9 @@ public class EmployeeValidator {
         }
     }
 
+    // kết quả validate để controller biết dữ liệu hợp lệ hay lỗi ở đâu.
     public static class EmployeeValidationResult {
+
         private final boolean valid;
         private final String errorCode;
         private final List<String> errorParams;
@@ -237,10 +249,12 @@ public class EmployeeValidator {
             this.errorParams = errorParams;
         }
 
+        // Trả về kết quả hợp lệ, không kèm mã lỗi.
         public static EmployeeValidationResult valid() {
             return new EmployeeValidationResult(true, null, Collections.emptyList());
         }
 
+        // Trả về kết quả không hợp lệ cùng mã lỗi và tham số để format message.
         public static EmployeeValidationResult invalid(String errorCode, List<String> errorParams) {
             return new EmployeeValidationResult(false, errorCode, errorParams);
         }

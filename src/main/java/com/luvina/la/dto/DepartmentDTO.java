@@ -1,12 +1,9 @@
 package com.luvina.la.dto;
 
 /**
- * Data Transfer Object cho thông tin phòng ban.
- * Chứa dữ liệu phòng ban được trả về từ service.
- *
- * @author tdthang
- * @version 1.0
- * @since April 13, 2026
+ * Copyright(C) 2026 Luvina Software Company
+ * <p>
+ * EmployeeController.java, April 13, 2026 tdthang
  */
 import lombok.Getter;
 import lombok.Setter;
