@@ -1,11 +1,8 @@
 package com.luvina.la.service.impl;
-/**
- * Copyright(C) 2026 Luvina Software Company
- * <p>
- * EmployeeController.java, April 13, 2026 tdthang
- */
+
 import com.luvina.la.config.Constants;
 import com.luvina.la.dto.EmployeeDTO;
+import com.luvina.la.dto.EmployeeDetailDTO;
 import com.luvina.la.entity.Certification;
 import com.luvina.la.entity.Department;
 import com.luvina.la.entity.Employee;
@@ -19,7 +16,9 @@ import com.luvina.la.service.EmployeeService;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import javax.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -34,13 +33,13 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final PasswordEncoder passwordEncoder;
 
     /**
-     * Constructor để inject các dependency cần dùng cho luồng employee.
+     * Constructor de inject cac dependency can dung cho luong employee.
      *
-     * @param employeeRepository repository truy cập dữ liệu nhân viên
-     * @param departmentRepository repository truy cập dữ liệu phòng ban
-     * @param certificationRepository repository truy cập dữ liệu chứng chỉ
-     * @param employeeCertificationRepository repository truy cập dữ liệu employee certification
-     * @param passwordEncoder component mã hóa mật khẩu trước khi lưu
+     * @param employeeRepository repository truy cap du lieu nhan vien
+     * @param departmentRepository repository truy cap du lieu phong ban
+     * @param certificationRepository repository truy cap du lieu chung chi
+     * @param employeeCertificationRepository repository truy cap du lieu employee certification
+     * @param passwordEncoder component ma hoa mat khau truoc khi luu
      */
     public EmployeeServiceImpl(
             EmployeeRepository employeeRepository,
@@ -57,11 +56,11 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     /**
-     * Đếm tổng số nhân viên theo điều kiện tìm kiếm.
+     * Dem tong so nhan vien theo dieu kien tim kiem.
      *
-     * @param departmentId ID phòng ban cần lọc
-     * @param employeeName tên nhân viên cần tìm
-     * @return tổng số bản ghi phù hợp
+     * @param departmentId ID phong ban can loc
+     * @param employeeName ten nhan vien can tim
+     * @return tong so ban ghi phu hop
      */
     @Override
     public Long getTotalEmployees(Long departmentId, String employeeName) {
@@ -69,16 +68,16 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     /**
-     * Lấy danh sách nhân viên theo điều kiện tìm kiếm, sắp xếp và phân trang.
+     * Lay danh sach nhan vien theo dieu kien tim kiem, sap xep va phan trang.
      *
-     * @param departmentId ID phòng ban cần lọc
-     * @param employeeName tên nhân viên cần tìm
-     * @param ordEmployeeName thứ tự sắp xếp theo tên nhân viên
-     * @param ordCertificationName thứ tự sắp xếp theo tên chứng chỉ
-     * @param ordEndDate thứ tự sắp xếp theo ngày hết hạn chứng chỉ
-     * @param offset vị trí bắt đầu lấy dữ liệu
-     * @param limit số bản ghi tối đa cần lấy
-     * @return danh sách nhân viên phù hợp
+     * @param departmentId ID phong ban can loc
+     * @param employeeName ten nhan vien can tim
+     * @param ordEmployeeName thu tu sap xep theo ten nhan vien
+     * @param ordCertificationName thu tu sap xep theo ten chung chi
+     * @param ordEndDate thu tu sap xep theo ngay het han chung chi
+     * @param offset vi tri bat dau lay du lieu
+     * @param limit so ban ghi toi da can lay
+     * @return danh sach nhan vien phu hop
      */
     @Override
     public List<EmployeeDTO> getEmployees(
@@ -88,9 +87,8 @@ public class EmployeeServiceImpl implements EmployeeService {
             String ordCertificationName,
             String ordEndDate,
             Integer offset,
-            Integer limit) {
-
-        // Nếu offset/limit không hợp lệ thì quay về giá trị mặc định.
+            Integer limit
+    ) {
         int finalLimit = (limit == null || limit <= 0) ? Constants.DEFAULT_LIMIT : limit;
         int finalOffset = (offset == null || offset < 0) ? Constants.DEFAULT_OFFSET : offset;
 
@@ -112,14 +110,36 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     /**
-     * Thêm mới nhân viên và chứng chỉ nếu request có chọn chứng chỉ.
+     * Lay thong tin chi tiet cua mot nhan vien theo ID.
      *
-     * @param request dữ liệu nhân viên đã được validate
+     * @param employeeId ID nhan vien can lay chi tiet
+     * @return thong tin chi tiet neu ton tai
+     */
+    @Override
+    @Transactional
+    public Optional<EmployeeDetailDTO> getEmployeeDetail(Long employeeId) {
+        Optional<Employee> employeeOptional = employeeRepository.findById(employeeId);
+        if (employeeOptional.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Employee employee = employeeOptional.get();
+        String role = employee.getRole() == null ? "USER" : employee.getRole().trim().toUpperCase();
+        if ("ADMIN".equals(role)) {
+            return Optional.empty();
+        }
+
+        return Optional.of(toEmployeeDetailDTO(employee));
+    }
+
+    /**
+     * Them moi nhan vien va chung chi neu request co chon chung chi.
+     *
+     * @param request du lieu nhan vien da duoc validate
      */
     @Override
     @Transactional
     public void addEmployee(EmployeeValidationRequest request) {
-        // Luồng thêm mới luôn tạo employee trước, sau đó mới gắn chứng chỉ.
         Employee employee = new Employee();
         applyEmployeeValues(employee, request);
         employee.setRole("USER");
@@ -128,15 +148,14 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     /**
-     * Cập nhật nhân viên và ghi đè lại thông tin chứng chỉ hiện tại.
+     * Cap nhat nhan vien va ghi de lai thong tin chung chi hien tai.
      *
-     * @param employeeId ID nhân viên cần cập nhật
-     * @param request dữ liệu nhân viên đã được validate
+     * @param employeeId ID nhan vien can cap nhat
+     * @param request du lieu nhan vien da duoc validate
      */
     @Override
     @Transactional
     public void updateEmployee(Long employeeId, EmployeeValidationRequest request) {
-        // Luồng cập nhật dùng lại employee hiện có rồi ghi đè thông tin mới.
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new IllegalArgumentException("Employee not found"));
         applyEmployeeValues(employee, request);
@@ -145,7 +164,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     private void applyEmployeeValues(Employee employee, EmployeeValidationRequest request) {
-        // Tìm phòng ban hợp lệ rồi gán lại toàn bộ thông tin cơ bản của nhân viên.
         Department department = departmentRepository.findById(Long.parseLong(request.getDepartmentId().trim()))
                 .orElseThrow(() -> new IllegalArgumentException("Department not found"));
 
@@ -157,25 +175,23 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setEmployeeTelephone(request.getEmployeeTelephone().trim());
         employee.setEmployeeLoginId(request.getEmployeeLoginId().trim());
         employee.setEmployeeLoginPassword(passwordEncoder.encode(request.getEmployeeLoginPassword()));
+
         if (employee.getRole() == null || employee.getRole().isBlank()) {
             employee.setRole("USER");
         }
     }
 
     private void replaceCertification(Employee employee, EmployeeValidationRequest request) {
-        // Xóa toàn bộ chứng chỉ cũ trước khi ghi lại trạng thái mới nhất.
         employeeCertificationRepository.deleteByEmployeeEmployeeId(employee.getEmployeeId());
 
         String certificationId = request.getCertificationId() == null ? "" : request.getCertificationId().trim();
         if (certificationId.isEmpty()) {
-            // Không chọn chứng chỉ thì chỉ cần giữ employee không có certification.
             return;
         }
 
         Certification certification = certificationRepository.findById(Long.parseLong(certificationId))
                 .orElseThrow(() -> new IllegalArgumentException("Certification not found"));
 
-        // Tạo lại bản ghi chứng chỉ theo dữ liệu vừa submit.
         EmployeeCertification employeeCertification = new EmployeeCertification();
         employeeCertification.setEmployee(employee);
         employeeCertification.setCertification(certification);
@@ -183,5 +199,46 @@ public class EmployeeServiceImpl implements EmployeeService {
         employeeCertification.setEndDate(LocalDate.parse(request.getCertificationEndDate().trim()));
         employeeCertification.setScore(new BigDecimal(request.getScore().trim()));
         employeeCertificationRepository.save(employeeCertification);
+    }
+
+    private EmployeeDetailDTO toEmployeeDetailDTO(Employee employee) {
+        EmployeeDetailDTO dto = new EmployeeDetailDTO();
+        dto.setEmployeeId(employee.getEmployeeId());
+        dto.setEmployeeLoginId(employee.getEmployeeLoginId());
+        dto.setDepartmentId(employee.getDepartment().getDepartmentId());
+        dto.setDepartmentName(employee.getDepartment().getDepartmentName());
+        dto.setEmployeeName(employee.getEmployeeName());
+        dto.setEmployeeNameKana(employee.getEmployeeNameKana());
+        dto.setEmployeeBirthDate(employee.getEmployeeBirthDate());
+        dto.setEmployeeEmail(employee.getEmployeeEmail());
+        dto.setEmployeeTelephone(employee.getEmployeeTelephone());
+
+        EmployeeCertification selectedCertification = selectEmployeeCertification(employee.getEmployeeCertifications());
+        if (selectedCertification != null) {
+            dto.setCertificationId(selectedCertification.getCertification().getCertificationId());
+            dto.setCertificationName(selectedCertification.getCertification().getCertificationName());
+            dto.setCertificationStartDate(selectedCertification.getStartDate());
+            dto.setCertificationEndDate(selectedCertification.getEndDate());
+            dto.setScore(selectedCertification.getScore());
+        }
+
+        return dto;
+    }
+
+    private EmployeeCertification selectEmployeeCertification(List<EmployeeCertification> employeeCertifications) {
+        if (employeeCertifications == null || employeeCertifications.isEmpty()) {
+            return null;
+        }
+
+        return employeeCertifications.stream()
+                .filter(employeeCertification -> employeeCertification.getCertification() != null)
+                .max(Comparator
+                        .comparing((EmployeeCertification employeeCertification)
+                                -> employeeCertification.getCertification().getCertificationLevel(),
+                                Comparator.nullsLast(Integer::compareTo))
+                        .thenComparing(EmployeeCertification::getEndDate, Comparator.nullsLast(LocalDate::compareTo))
+                        .thenComparing(EmployeeCertification::getEmployeeCertificationId,
+                                Comparator.nullsLast(Long::compareTo)))
+                .orElse(null);
     }
 }

@@ -41,6 +41,33 @@ public class EmployeeValidationResponse {
     }
 
     /**
+     * Kết quả validate giữa validator và controller.
+     */
+    @Getter
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class ErrorResponse {
+        private final String code;
+        private final List<String> params;
+
+        private ErrorResponse(String code, List<String> params) {
+            this.code = code;
+            this.params = params;
+        }
+
+        public static ErrorResponse valid() {
+            return new ErrorResponse(String.valueOf(HttpStatus.OK.value()), List.of());
+        }
+
+        public static ErrorResponse invalid(String code, List<String> params) {
+            return new ErrorResponse(code, params != null ? params : List.of());
+        }
+
+        public boolean isValid() {
+            return String.valueOf(HttpStatus.OK.value()).equals(code);
+        }
+    }
+
+    /**
      * Tạo response thành công.
      *
      * @return response với mã 200

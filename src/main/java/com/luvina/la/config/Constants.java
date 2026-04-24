@@ -36,6 +36,8 @@ public class Constants {
     public static final Pattern POSITIVE_INTEGER_PATTERN = Pattern.compile("^[1-9]\\d*$");
     public static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
+
+
     // config endpoints public
     public static final String[] ENDPOINTS_PUBLIC = new String[] {
             "/",

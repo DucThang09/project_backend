@@ -1,34 +1,36 @@
 package com.luvina.la.service;
-/**
- * Copyright(C) 2026 Luvina Software Company
- * <p>
- * EmployeeController.java, April 13, 2026 tdthang
- */
+
 import com.luvina.la.dto.EmployeeDTO;
+import com.luvina.la.dto.EmployeeDetailDTO;
 import com.luvina.la.payload.EmployeeValidationRequest;
 import java.util.List;
+import java.util.Optional;
 
+/**
+ * Service xu ly nghiep vu nhan vien.
+ */
 public interface EmployeeService {
+
     /**
-     * Đếm tổng số nhân viên theo điều kiện tìm kiếm hiện tại.
+     * Dem tong so nhan vien theo dieu kien tim kiem hien tai.
      *
-     * @param departmentId ID phòng ban cần lọc
-     * @param employeeName tên nhân viên cần tìm
-     * @return tổng số bản ghi phù hợp
+     * @param departmentId ID phong ban can loc
+     * @param employeeName ten nhan vien can tim
+     * @return tong so ban ghi phu hop
      */
     Long getTotalEmployees(Long departmentId, String employeeName);
 
     /**
-     * Lấy danh sách nhân viên theo điều kiện tìm kiếm, sắp xếp và phân trang.
+     * Lay danh sach nhan vien theo dieu kien tim kiem, sap xep va phan trang.
      *
-     * @param departmentId ID phòng ban cần lọc
-     * @param employeeName tên nhân viên cần tìm
-     * @param ordEmployeeName thứ tự sắp xếp theo tên nhân viên
-     * @param ordCertificationName thứ tự sắp xếp theo tên chứng chỉ
-     * @param ordEndDate thứ tự sắp xếp theo ngày hết hạn chứng chỉ
-     * @param offset vị trí bắt đầu lấy dữ liệu
-     * @param limit số bản ghi tối đa cần lấy
-     * @return danh sách nhân viên phù hợp
+     * @param departmentId ID phong ban can loc
+     * @param employeeName ten nhan vien can tim
+     * @param ordEmployeeName thu tu sap xep theo ten nhan vien
+     * @param ordCertificationName thu tu sap xep theo ten chung chi
+     * @param ordEndDate thu tu sap xep theo ngay het han chung chi
+     * @param offset vi tri bat dau lay du lieu
+     * @param limit so ban ghi toi da can lay
+     * @return danh sach nhan vien phu hop
      */
     List<EmployeeDTO> getEmployees(
             Long departmentId,
@@ -41,17 +43,25 @@ public interface EmployeeService {
     );
 
     /**
-     * Thêm mới nhân viên và thông tin chứng chỉ nếu có.
+     * Lay thong tin chi tiet cua mot nhan vien theo ID.
      *
-     * @param request dữ liệu nhân viên đã được validate
+     * @param employeeId ID nhan vien can lay chi tiet
+     * @return thong tin chi tiet neu ton tai
+     */
+    Optional<EmployeeDetailDTO> getEmployeeDetail(Long employeeId);
+
+    /**
+     * Them moi nhan vien va thong tin chung chi neu co.
+     *
+     * @param request du lieu nhan vien da duoc validate
      */
     void addEmployee(EmployeeValidationRequest request);
 
     /**
-     * Cập nhật nhân viên theo ID và ghi đè lại thông tin chứng chỉ hiện tại.
+     * Cap nhat nhan vien theo ID va ghi de lai thong tin chung chi hien tai.
      *
-     * @param employeeId ID nhân viên cần cập nhật
-     * @param request dữ liệu nhân viên đã được validate
+     * @param employeeId ID nhan vien can cap nhat
+     * @param request du lieu nhan vien da duoc validate
      */
     void updateEmployee(Long employeeId, EmployeeValidationRequest request);
 }

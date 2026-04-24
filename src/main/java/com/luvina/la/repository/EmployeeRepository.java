@@ -109,4 +109,35 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
             @Param("limit") Integer limit,
             @Param("offset") Integer offset
     );
+
+    /**
+     * Lay thong tin chi tiet cua mot nhan vien.
+     *
+     * @param employeeId ID nhan vien can lay chi tiet
+     * @return du lieu tho tu truy van native
+     */
+    @Query(value = """
+            SELECT
+                e.employee_id,
+                e.employee_login_id,
+                d.department_id,
+                d.department_name,
+                e.employee_name,
+                e.employee_name_kana,
+                e.employee_birth_date,
+                e.employee_email,
+                e.employee_telephone,
+                c.certification_id,
+                c.certification_name,
+                ec.start_date,
+                ec.end_date,
+                ec.score
+            FROM employees e
+            INNER JOIN departments d ON e.department_id = d.department_id
+            LEFT JOIN employee_certifications ec ON e.employee_id = ec.employee_id
+            LEFT JOIN certifications c ON ec.certification_id = c.certification_id
+            WHERE e.employee_id = :employeeId
+              AND COALESCE(UPPER(TRIM(e.employee_role)), 'USER') <> 'ADMIN'
+            """, nativeQuery = true)
+    List<Object[]> findEmployeeDetail(@Param("employeeId") Long employeeId);
 }

@@ -1,6 +1,7 @@
 package com.luvina.la.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -8,9 +9,11 @@ import static org.mockito.Mockito.when;
 
 import com.luvina.la.config.Constants;
 import com.luvina.la.dto.EmployeeDTO;
+import com.luvina.la.dto.EmployeeDetailDTO;
 import com.luvina.la.entity.Certification;
 import com.luvina.la.entity.Department;
 import com.luvina.la.entity.Employee;
+import com.luvina.la.entity.EmployeeCertification;
 import com.luvina.la.payload.EmployeeValidationRequest;
 import com.luvina.la.repository.CertificationRepository;
 import com.luvina.la.repository.DepartmentRepository;
@@ -125,6 +128,100 @@ class EmployeeServiceImplTest {
     }
 
     @Test
+    void shouldReturnEmployeeDetailWhenEmployeeExists() {
+        Department department = new Department();
+        department.setDepartmentId(2L);
+        department.setDepartmentName("Development");
+
+        Certification certification = new Certification();
+        certification.setCertificationId(1L);
+        certification.setCertificationName("N1");
+        certification.setCertificationLevel(1);
+
+        EmployeeCertification employeeCertification = new EmployeeCertification();
+        employeeCertification.setEmployeeCertificationId(10L);
+        employeeCertification.setCertification(certification);
+        employeeCertification.setStartDate(LocalDate.of(2020, 1, 1));
+        employeeCertification.setEndDate(LocalDate.of(2022, 1, 1));
+        employeeCertification.setScore(new BigDecimal("850"));
+
+        Employee employee = new Employee();
+        employee.setEmployeeId(30L);
+        employee.setEmployeeLoginId("user01");
+        employee.setDepartment(department);
+        employee.setEmployeeName("Test User");
+        employee.setEmployeeNameKana("ﾃｽﾄ");
+        employee.setEmployeeBirthDate(LocalDate.of(2000, 1, 1));
+        employee.setEmployeeEmail("test@example.com");
+        employee.setEmployeeTelephone("0123456789");
+        employee.setRole("USER");
+        employee.setEmployeeCertifications(List.of(employeeCertification));
+
+        when(employeeRepository.findById(30L)).thenReturn(Optional.of(employee));
+
+        Optional<EmployeeDetailDTO> result = employeeService.getEmployeeDetail(30L);
+
+        assertTrue(result.isPresent());
+        assertEquals("user01", result.get().getEmployeeLoginId());
+        assertEquals("Development", result.get().getDepartmentName());
+        assertEquals("N1", result.get().getCertificationName());
+    }
+
+    @Test
+    void shouldReturnEmptyWhenEmployeeDoesNotExist() {
+        when(employeeRepository.findById(7L)).thenReturn(Optional.empty());
+
+        Optional<EmployeeDetailDTO> result = employeeService.getEmployeeDetail(7L);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void shouldReturnEmptyWhenEmployeeIsAdmin() {
+        Department department = new Department();
+        department.setDepartmentId(1L);
+        department.setDepartmentName("Admin");
+
+        Employee employee = new Employee();
+        employee.setEmployeeId(1L);
+        employee.setDepartment(department);
+        employee.setRole("ADMIN");
+
+        when(employeeRepository.findById(1L)).thenReturn(Optional.of(employee));
+
+        Optional<EmployeeDetailDTO> result = employeeService.getEmployeeDetail(1L);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void shouldReturnEmployeeDetailWithoutCertificationWhenEmployeeHasNoCertification() {
+        Department department = new Department();
+        department.setDepartmentId(2L);
+        department.setDepartmentName("Development");
+
+        Employee employee = new Employee();
+        employee.setEmployeeId(7L);
+        employee.setEmployeeLoginId("user06");
+        employee.setDepartment(department);
+        employee.setEmployeeName("Bui Thu Ha");
+        employee.setEmployeeNameKana("ﾌﾞｲ");
+        employee.setEmployeeBirthDate(LocalDate.of(1994, 6, 30));
+        employee.setEmployeeEmail("ha06@example.com");
+        employee.setEmployeeTelephone("0901000006");
+        employee.setRole("USER");
+        employee.setEmployeeCertifications(Collections.emptyList());
+
+        when(employeeRepository.findById(7L)).thenReturn(Optional.of(employee));
+
+        Optional<EmployeeDetailDTO> result = employeeService.getEmployeeDetail(7L);
+
+        assertTrue(result.isPresent());
+        assertEquals("user06", result.get().getEmployeeLoginId());
+        assertEquals(null, result.get().getCertificationName());
+    }
+
+    @Test
     void shouldAddEmployeeAndCertification() {
         EmployeeValidationRequest request = createRequest();
         Department department = new Department();
@@ -172,7 +269,7 @@ class EmployeeServiceImplTest {
         EmployeeValidationRequest request = new EmployeeValidationRequest();
         request.setDepartmentId("2");
         request.setEmployeeName("Test User");
-        request.setEmployeeNameKana("テストユーザー");
+        request.setEmployeeNameKana("ﾃｽﾄ");
         request.setEmployeeBirthDate("2000-01-01");
         request.setEmployeeEmail("test@example.com");
         request.setEmployeeTelephone("0123456789");

@@ -1,21 +1,19 @@
 package com.luvina.la.controller;
-/**
- * Copyright(C) 2026 Luvina Software Company
- * <p>
- * EmployeeController.java, April 13, 2026 tdthang
- */
 
 import com.luvina.la.dto.EmployeeDTO;
+import com.luvina.la.dto.EmployeeDetailDTO;
+import com.luvina.la.payload.EmployeeDetailResponse;
 import com.luvina.la.payload.EmployeeListResponse;
 import com.luvina.la.payload.EmployeeValidationRequest;
 import com.luvina.la.payload.EmployeeValidationResponse;
+import com.luvina.la.payload.EmployeeValidationResponse.ErrorResponse;
 import com.luvina.la.service.EmployeeService;
 import com.luvina.la.validator.EmployeeSearchValidator;
 import com.luvina.la.validator.EmployeeSearchValidator.EmployeeSearchValidationResult;
 import com.luvina.la.validator.EmployeeValidator;
-import com.luvina.la.validator.EmployeeValidator.EmployeeValidationResult;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Controller xử lý các API nhân viên.
+ * Controller xu ly cac API nhan vien.
  */
 @RestController
 @RequestMapping("/employee")
@@ -38,11 +36,11 @@ public class EmployeeController {
     private final EmployeeValidator employeeValidator;
 
     /**
-     * Constructor để inject service và validator phục vụ nghiệp vụ nhân viên.
+     * Constructor de inject service va validator phuc vu nghiep vu nhan vien.
      *
-     * @param employeeService service xử lý nghiệp vụ nhân viên
-     * @param employeeSearchValidator validator cho API danh sách nhân viên
-     * @param employeeValidator validator cho API add/edit nhân viên
+     * @param employeeService service xu ly nghiep vu nhan vien
+     * @param employeeSearchValidator validator cho API danh sach nhan vien
+     * @param employeeValidator validator cho API add/edit nhan vien
      */
     public EmployeeController(
             EmployeeService employeeService,
@@ -55,16 +53,16 @@ public class EmployeeController {
     }
 
     /**
-     * Lấy danh sách nhân viên theo điều kiện tìm kiếm và phân trang.
+     * Lay danh sach nhan vien theo dieu kien tim kiem va phan trang.
      *
-     * @param departmentId ID phòng ban cần lọc
-     * @param employeeName tên nhân viên cần tìm kiếm
-     * @param ordEmployeeName thứ tự sắp xếp theo tên nhân viên
-     * @param ordCertificationName thứ tự sắp xếp theo tên chứng chỉ
-     * @param ordEndDate thứ tự sắp xếp theo ngày hết hạn chứng chỉ
-     * @param offsetStr vị trí bắt đầu lấy dữ liệu
-     * @param limitStr số bản ghi tối đa cần lấy
-     * @return response chứa danh sách nhân viên hoặc lỗi validate/hệ thống
+     * @param departmentId ID phong ban can loc
+     * @param employeeName ten nhan vien can tim kiem
+     * @param ordEmployeeName thu tu sap xep theo ten nhan vien
+     * @param ordCertificationName thu tu sap xep theo ten chung chi
+     * @param ordEndDate thu tu sap xep theo ngay het han chung chi
+     * @param offsetStr vi tri bat dau lay du lieu
+     * @param limitStr so ban ghi toi da can lay
+     * @return response chua danh sach nhan vien hoac loi validate
      */
     @GetMapping
     public ResponseEntity<EmployeeListResponse> getListEmployees(
@@ -74,8 +72,8 @@ public class EmployeeController {
             @RequestParam(name = "ord_certification_name", required = false) String ordCertificationName,
             @RequestParam(name = "ord_end_date", required = false) String ordEndDate,
             @RequestParam(name = "offset", required = false) String offsetStr,
-            @RequestParam(name = "limit", required = false) String limitStr) {
-
+            @RequestParam(name = "limit", required = false) String limitStr
+    ) {
         try {
             EmployeeSearchValidationResult validationResult = employeeSearchValidator.validate(
                     employeeName,
@@ -99,7 +97,9 @@ public class EmployeeController {
             Long totalRecords = employeeService.getTotalEmployees(departmentId, normalizedName);
 
             if (totalRecords == 0) {
-                return ResponseEntity.ok(EmployeeListResponse.success(totalRecords, Collections.emptyList(), "MSG005"));
+                return ResponseEntity.ok(
+                        EmployeeListResponse.success(totalRecords, Collections.emptyList(), "MSG005")
+                );
             }
 
             List<EmployeeDTO> employees = employeeService.getEmployees(
@@ -119,22 +119,47 @@ public class EmployeeController {
     }
 
     /**
-     * Validate dữ liệu add/edit nhân viên trước khi chuyển sang màn confirm.
+     * Lay thong tin chi tiet cua mot nhan vien theo ID.
      *
-     * @param request dữ liệu nhân viên cần validate
-     * @return response thành công hoặc lỗi validate
+     * @param employeeId ID nhan vien can lay chi tiet
+     * @return response thanh cong hoac loi he thong
+     */
+    @GetMapping("/{employeeId}")
+    public ResponseEntity<EmployeeDetailResponse> getEmployeeDetail(@PathVariable Long employeeId) {
+        try {
+            Optional<EmployeeDetailDTO> employeeDetail = employeeService.getEmployeeDetail(employeeId);
+
+            if (employeeDetail.isEmpty()) {
+                return ResponseEntity.ok(EmployeeDetailResponse.error("ER023", Collections.emptyList()));
+            }
+
+            return ResponseEntity.ok(EmployeeDetailResponse.success(employeeDetail.get()));
+        } catch (Exception exception) {
+            return ResponseEntity.ok(EmployeeDetailResponse.error("ER023", Collections.emptyList()));
+        }
+    }
+
+    /**
+     * Validate du lieu add/edit nhan vien truoc khi chuyen sang man confirm.
+     *
+     * @param request du lieu nhan vien can validate
+     * @return response thanh cong hoac loi validate
      */
     @PostMapping("/validate")
     public ResponseEntity<EmployeeValidationResponse> validateEmployeeInput(
             @RequestBody(required = false) EmployeeValidationRequest request
     ) {
         try {
-            EmployeeValidationResult validationResult = employeeValidator.validate(request);
-            if (!validationResult.isValid()) {
+            if (request == null) {
+                return ResponseEntity.ok(EmployeeValidationResponse.error("ER023", Collections.emptyList()));
+            }
+
+            ErrorResponse validationError = employeeValidator.validate(request);
+            if (!validationError.isValid()) {
                 return ResponseEntity.ok(
                         EmployeeValidationResponse.error(
-                                validationResult.getErrorCode(),
-                                validationResult.getErrorParams()
+                                validationError.getCode(),
+                                validationError.getParams()
                         )
                 );
             }
@@ -146,22 +171,26 @@ public class EmployeeController {
     }
 
     /**
-     * Thêm mới nhân viên sau khi validate lại dữ liệu submit.
+     * Them moi nhan vien sau khi validate lai du lieu submit.
      *
-     * @param request dữ liệu nhân viên cần thêm mới
-     * @return response thành công hoặc lỗi validate/hệ thống
+     * @param request du lieu nhan vien can them moi
+     * @return response thanh cong hoac loi validate/he thong
      */
     @PostMapping
     public ResponseEntity<EmployeeValidationResponse> addEmployee(
             @RequestBody(required = false) EmployeeValidationRequest request
     ) {
         try {
-            EmployeeValidationResult validationResult = employeeValidator.validate(request);
-            if (!validationResult.isValid()) {
+            if (request == null) {
+                return ResponseEntity.ok(EmployeeValidationResponse.error("ER023", Collections.emptyList()));
+            }
+
+            ErrorResponse validationError = employeeValidator.validate(request);
+            if (!validationError.isValid()) {
                 return ResponseEntity.ok(
                         EmployeeValidationResponse.error(
-                                validationResult.getErrorCode(),
-                                validationResult.getErrorParams()
+                                validationError.getCode(),
+                                validationError.getParams()
                         )
                 );
             }
@@ -174,11 +203,11 @@ public class EmployeeController {
     }
 
     /**
-     * Cập nhật nhân viên sau khi validate lại dữ liệu submit.
+     * Cap nhat nhan vien sau khi validate lai du lieu submit.
      *
-     * @param employeeId ID nhân viên cần cập nhật
-     * @param request dữ liệu nhân viên cần cập nhật
-     * @return response thành công hoặc lỗi validate/hệ thống
+     * @param employeeId ID nhan vien can cap nhat
+     * @param request du lieu nhan vien can cap nhat
+     * @return response thanh cong hoac loi validate/he thong
      */
     @PutMapping("/{employeeId}")
     public ResponseEntity<EmployeeValidationResponse> updateEmployee(
@@ -186,20 +215,23 @@ public class EmployeeController {
             @RequestBody(required = false) EmployeeValidationRequest request
     ) {
         try {
-            EmployeeValidationRequest safeRequest = request == null ? new EmployeeValidationRequest() : request;
-            safeRequest.setEmployeeId(String.valueOf(employeeId));
+            if (request == null) {
+                return ResponseEntity.ok(EmployeeValidationResponse.error("ER023", Collections.emptyList()));
+            }
 
-            EmployeeValidationResult validationResult = employeeValidator.validate(safeRequest);
-            if (!validationResult.isValid()) {
+            request.setEmployeeId(String.valueOf(employeeId));
+
+            ErrorResponse validationError = employeeValidator.validate(request);
+            if (!validationError.isValid()) {
                 return ResponseEntity.ok(
                         EmployeeValidationResponse.error(
-                                validationResult.getErrorCode(),
-                                validationResult.getErrorParams()
+                                validationError.getCode(),
+                                validationError.getParams()
                         )
                 );
             }
 
-            employeeService.updateEmployee(employeeId, safeRequest);
+            employeeService.updateEmployee(employeeId, request);
             return ResponseEntity.ok(EmployeeValidationResponse.success());
         } catch (Exception exception) {
             return ResponseEntity.ok(EmployeeValidationResponse.error("ER023", Collections.emptyList()));
