@@ -17,11 +17,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Controller xử lý API phòng ban.
+ * Cung cấp danh sách phòng ban cho màn hình tìm kiếm và màn hình thêm/sửa nhân viên.
  */
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/department")
 public class DepartmentController {
 
+    /** Service xử lý nghiệp vụ lấy danh sách phòng ban. */
     private final DepartmentService departmentService;
 
     /**
@@ -34,11 +36,11 @@ public class DepartmentController {
     }
 
     /**
-     * Lấy danh sách phòng ban.
+     * Lấy danh sách phòng ban đang có trong hệ thống.
      *
      * @return response chứa danh sách phòng ban hoặc lỗi hệ thống
      */
-    @GetMapping("/departments")
+    @GetMapping
     public ResponseEntity<DepartmentResponse> getDepartments() {
         try {
             List<DepartmentDTO> departments = departmentService.getDepartments();

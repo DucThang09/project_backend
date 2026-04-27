@@ -74,12 +74,18 @@ public class EmployeeValidator {
      */
     public ErrorResponse validate(EmployeeValidationRequest request) {
         ErrorResponse errorResponse;
+        // Mode edit không cho sửa account và password nên bỏ qua validate các field đó.
+        boolean isEditMode = request.getEmployeeId() != null && !request.getEmployeeId().isBlank();
 
-        errorResponse = validateLoginId(request.getEmployeeLoginId(), request.getEmployeeId());
-        if (errorResponse != null) {
-            return errorResponse;
+        // Khi thêm mới, kiểm tra account name có rỗng, sai format hoặc bị trùng không.
+        if (!isEditMode) {
+            errorResponse = validateLoginId(request.getEmployeeLoginId(), request.getEmployeeId());
+            if (errorResponse != null) {
+                return errorResponse;
+            }
         }
 
+        // Kiểm tra các thông tin cơ bản bắt buộc của nhân viên.
         errorResponse = validateEmployeeName(request.getEmployeeName());
         if (errorResponse != null) {
             return errorResponse;
@@ -105,21 +111,27 @@ public class EmployeeValidator {
             return errorResponse;
         }
 
-        errorResponse = validatePassword(request.getEmployeeLoginPassword());
-        if (errorResponse != null) {
-            return errorResponse;
+        // Khi thêm mới, bắt buộc nhập password hợp lệ.
+        if (!isEditMode) {
+            errorResponse = validatePassword(request.getEmployeeLoginPassword());
+            if (errorResponse != null) {
+                return errorResponse;
+            }
         }
 
+        // Kiểm tra phòng ban có hợp lệ và tồn tại trong DB không.
         errorResponse = validateDepartment(request.getDepartmentId());
         if (errorResponse != null) {
             return errorResponse;
         }
 
+        // Nếu người dùng chọn chứng chỉ thì kiểm tra toàn bộ nhóm thông tin chứng chỉ.
         errorResponse = validateCertification(request);
         if (errorResponse != null) {
             return errorResponse;
         }
 
+        // Không có lỗi nào thì trả kết quả validate thành công.
         return ErrorResponse.valid();
     }
 
@@ -267,8 +279,11 @@ public class EmployeeValidator {
      * @return ErrorResponse chứa mã lỗi nếu có lỗi, hoặc null nếu không có lỗi
      */
     public ErrorResponse validateLoginId(String employeeLoginId, String employeeId) {
+        // Chuẩn hóa loginId trước khi kiểm tra.
         String trimmedLoginId = employeeLoginId == null ? null : employeeLoginId.trim();
         Long currentEmployeeId = null;
+
+        // Khi edit, chuyển employeeId hiện tại sang Long để bỏ qua chính bản ghi đang sửa khi check trùng.
         if (employeeId != null && !employeeId.isEmpty() && POSITIVE_INTEGER_PATTERN.matcher(employeeId).matches()) {
             try {
                 currentEmployeeId = Long.parseLong(employeeId);
@@ -284,6 +299,7 @@ public class EmployeeValidator {
         } else if (!isValidLoginId(trimmedLoginId)) {
             return buildResponse("ER019");
         } else {
+            // Kiểm tra account name đã tồn tại ở nhân viên khác chưa.
             Optional<Employee> existingEmployee = employeeRepository.findByEmployeeLoginId(trimmedLoginId);
             if (existingEmployee.isPresent()
                     && (currentEmployeeId == null
@@ -403,8 +419,11 @@ public class EmployeeValidator {
      * @return ErrorResponse chứa mã lỗi nếu có lỗi, hoặc null nếu không có lỗi
      */
     public ErrorResponse validateDepartment(String departmentId) {
+        // Chuẩn hóa departmentId trước khi kiểm tra rỗng, số nguyên dương và tồn tại DB.
         String trimmedDepartmentId = departmentId == null ? null : departmentId.trim();
         Long departmentIdValue = null;
+
+        // Chỉ parse sang Long khi departmentId đúng format số nguyên dương.
         if (trimmedDepartmentId != null
                 && !trimmedDepartmentId.isEmpty()
                 && POSITIVE_INTEGER_PATTERN.matcher(trimmedDepartmentId).matches()) {
@@ -420,6 +439,7 @@ public class EmployeeValidator {
         } else if (departmentIdValue == null) {
             return buildResponse("ER018", List.of(GROUP));
         } else if (!departmentRepository.existsById(departmentIdValue)) {
+            // ID đúng format nhưng không tồn tại trong bảng phòng ban.
             return buildResponse("ER004", List.of(GROUP));
         }
         return null;
@@ -432,12 +452,15 @@ public class EmployeeValidator {
      * @return ErrorResponse chứa mã lỗi nếu có lỗi, hoặc null nếu không có lỗi
      */
     public ErrorResponse validateCertification(EmployeeValidationRequest request) {
+        // Nếu không chọn chứng chỉ thì bỏ qua toàn bộ validate nhóm chứng chỉ.
         String certificationId = request.getCertificationId() == null ? null : request.getCertificationId().trim();
         if (certificationId == null || certificationId.isEmpty()) {
             return null;
         }
 
         Long certificationIdValue = null;
+
+        // Chuyển certificationId sang Long khi đúng format số nguyên dương.
         if (certificationId != null && !certificationId.isEmpty() && POSITIVE_INTEGER_PATTERN.matcher(certificationId).matches()) {
             try {
                 certificationIdValue = Long.parseLong(certificationId);
@@ -451,6 +474,7 @@ public class EmployeeValidator {
                 ? null : request.getCertificationEndDate().trim();
         String score = request.getScore() == null ? null : request.getScore().trim();
 
+        // Kiểm tra chứng chỉ tồn tại và các field liên quan có đầy đủ, đúng format không.
         if (certificationIdValue == null) {
             return buildResponse("ER018", List.of(CERTIFICATION));
         } else if (!certificationRepository.existsById(certificationIdValue)) {
@@ -471,6 +495,7 @@ public class EmployeeValidator {
             LocalDate start;
             LocalDate end;
             try {
+                // Parse ngày để so sánh ngày hết hạn phải lớn hơn ngày cấp.
                 start = LocalDate.parse(certificationStartDate, DATE_FORMATTER);
                 end = LocalDate.parse(certificationEndDate, DATE_FORMATTER);
             } catch (DateTimeParseException ex) {
@@ -479,6 +504,7 @@ public class EmployeeValidator {
             if (start == null || end == null) {
                 return buildResponse("ER005", List.of(CERTIFICATION_END_DATE, "yyyy/MM/dd"));
             } else if (!end.isAfter(start)) {
+                // Ngày hết hạn phải sau ngày cấp chứng chỉ.
                 return buildResponse("ER012", Collections.emptyList());
             }
         }

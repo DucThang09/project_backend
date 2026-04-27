@@ -30,13 +30,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Controller xử lý các API xác thực người dùng.
+ * Bao gồm đăng nhập và kiểm tra token JWT.
  */
 @RestController
 public class AuthController {
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
+    /** Component tạo và kiểm tra JWT. */
     final JwtTokenProvider tokenProvider;
+
+    /** Component xác thực thông tin đăng nhập của người dùng. */
     final AuthenticationManager authenticationManager;
+
+    /** Service load thông tin người dùng phục vụ xác thực. */
     final UserDetailsServiceImpl userDetailsService;
 
     /**
@@ -53,7 +59,7 @@ public class AuthController {
     }
 
     /**
-     * API đăng nhập cho người dùng.
+     * Đăng nhập người dùng và trả về JWT nếu thông tin đăng nhập hợp lệ.
      *
      * @param loginRequest thông tin đăng nhập từ client
      * @param request request hiện tại
@@ -84,7 +90,7 @@ public class AuthController {
     }
 
     /**
-     * API kiểm tra token JWT còn hợp lệ.
+     * Kiểm tra token JWT hiện tại còn hợp lệ.
      *
      * @return map chứa thông báo xác nhận token hợp lệ
      */

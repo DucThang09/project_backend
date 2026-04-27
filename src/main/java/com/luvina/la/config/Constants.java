@@ -48,6 +48,7 @@ public class Constants {
     // config endpoints for USER role
     public static final String[] ENDPOINTS_WITH_ROLE = new String[] {
             "/user/**",
+            "/department/**",
             "/employee/**",
             "/certification/**"
     };

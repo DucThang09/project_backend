@@ -25,22 +25,28 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Controller xu ly cac API nhan vien.
+ * Controller xử lý các API liên quan đến nhân viên.
+ * Bao gồm danh sách, chi tiết, validate, thêm mới và cập nhật nhân viên.
  */
 @RestController
 @RequestMapping("/employee")
 public class EmployeeController {
 
+    /** Service xử lý nghiệp vụ và truy vấn dữ liệu nhân viên. */
     private final EmployeeService employeeService;
+
+    /** Validator kiểm tra tham số tìm kiếm danh sách nhân viên. */
     private final EmployeeSearchValidator employeeSearchValidator;
+
+    /** Validator kiểm tra dữ liệu thêm mới và cập nhật nhân viên. */
     private final EmployeeValidator employeeValidator;
 
     /**
-     * Constructor de inject service va validator phuc vu nghiep vu nhan vien.
+     * Khởi tạo controller với các service và validator cần dùng cho luồng nhân viên.
      *
-     * @param employeeService service xu ly nghiep vu nhan vien
+     * @param employeeService service xử lý nghiệp vụ nhân viên
      * @param employeeSearchValidator validator cho API danh sach nhan vien
-     * @param employeeValidator validator cho API add/edit nhan vien
+     * @param employeeValidator validator cho API thêm mới và cập nhật nhân viên
      */
     public EmployeeController(
             EmployeeService employeeService,
@@ -53,16 +59,16 @@ public class EmployeeController {
     }
 
     /**
-     * Lay danh sach nhan vien theo dieu kien tim kiem va phan trang.
+     * Lấy danh sách nhân viên theo điều kiện tìm kiếm, sắp xếp và phân trang.
      *
-     * @param departmentId ID phong ban can loc
-     * @param employeeName ten nhan vien can tim kiem
-     * @param ordEmployeeName thu tu sap xep theo ten nhan vien
-     * @param ordCertificationName thu tu sap xep theo ten chung chi
-     * @param ordEndDate thu tu sap xep theo ngay het han chung chi
-     * @param offsetStr vi tri bat dau lay du lieu
-     * @param limitStr so ban ghi toi da can lay
-     * @return response chua danh sach nhan vien hoac loi validate
+     * @param departmentId ID phòng ban cần lọc
+     * @param employeeName tên nhân viên cần tìm kiếm
+     * @param ordEmployeeName thứ tự sắp xếp theo tên nhân viên
+     * @param ordCertificationName thứ tự sắp xếp theo tên chứng chỉ
+     * @param ordEndDate thứ tự sắp xếp theo ngày hết hạn chứng chỉ
+     * @param offsetStr vị trí bắt đầu lấy dữ liệu
+     * @param limitStr số bản ghi tối đa cần lấy
+     * @return response chứa danh sách nhân viên hoặc thông tin lỗi
      */
     @GetMapping
     public ResponseEntity<EmployeeListResponse> getListEmployees(
@@ -75,6 +81,7 @@ public class EmployeeController {
             @RequestParam(name = "limit", required = false) String limitStr
     ) {
         try {
+            // Kiểm tra các tham số tìm kiếm, sắp xếp và phân trang trước khi query DB.
             EmployeeSearchValidationResult validationResult = employeeSearchValidator.validate(
                     employeeName,
                     ordEmployeeName,
@@ -84,6 +91,7 @@ public class EmployeeController {
                     limitStr
             );
 
+            // Nếu tham số không hợp lệ thì trả response lỗi validate cho frontend.
             if (!validationResult.isValid()) {
                 return ResponseEntity.ok(
                         EmployeeListResponse.error(
@@ -93,15 +101,20 @@ public class EmployeeController {
                 );
             }
 
+            // Lấy tên nhân viên đã được chuẩn hóa để dùng thống nhất cho count và search.
             String normalizedName = validationResult.getNormalizedEmployeeName();
+
+            // Đếm tổng số nhân viên thỏa mãn điều kiện tìm kiếm.
             Long totalRecords = employeeService.getTotalEmployees(departmentId, normalizedName);
 
+            // Nếu không có bản ghi nào thì trả danh sách rỗng kèm message MSG005.
             if (totalRecords == 0) {
                 return ResponseEntity.ok(
                         EmployeeListResponse.success(totalRecords, Collections.emptyList(), "MSG005")
                 );
             }
 
+            // Lấy danh sách nhân viên theo điều kiện đã validate, kèm sắp xếp và phân trang.
             List<EmployeeDTO> employees = employeeService.getEmployees(
                     departmentId,
                     normalizedName,
@@ -112,49 +125,59 @@ public class EmployeeController {
                     validationResult.getLimit()
             );
 
+            // Trả response thành công cho màn ADM002.
             return ResponseEntity.ok(EmployeeListResponse.success(totalRecords, employees));
         } catch (Exception exception) {
+            // Nếu có lỗi ngoài dự kiến thì trả lỗi hệ thống ER023.
             return ResponseEntity.ok(EmployeeListResponse.error("ER023", Collections.emptyList()));
         }
     }
 
     /**
-     * Lay thong tin chi tiet cua mot nhan vien theo ID.
+     * Lấy thông tin chi tiết của một nhân viên theo ID.
      *
-     * @param employeeId ID nhan vien can lay chi tiet
-     * @return response thanh cong hoac loi he thong
+     * @param employeeId ID nhân viên cần lấy chi tiết
+     * @return response thành công chứa thông tin nhân viên hoặc response lỗi hệ thống
      */
     @GetMapping("/{employeeId}")
     public ResponseEntity<EmployeeDetailResponse> getEmployeeDetail(@PathVariable Long employeeId) {
         try {
+            // Lấy thông tin chi tiết nhân viên theo ID từ service.
             Optional<EmployeeDetailDTO> employeeDetail = employeeService.getEmployeeDetail(employeeId);
 
+            // Nếu không tìm thấy nhân viên hoặc nhân viên không được phép hiển thị thì trả lỗi hệ thống.
             if (employeeDetail.isEmpty()) {
                 return ResponseEntity.ok(EmployeeDetailResponse.error("ER023", Collections.emptyList()));
             }
 
+            // Trả response thành công cho màn ADM003.
             return ResponseEntity.ok(EmployeeDetailResponse.success(employeeDetail.get()));
         } catch (Exception exception) {
+            // Nếu có lỗi ngoài dự kiến thì trả lỗi hệ thống ER023.
             return ResponseEntity.ok(EmployeeDetailResponse.error("ER023", Collections.emptyList()));
         }
     }
 
     /**
-     * Validate du lieu add/edit nhan vien truoc khi chuyen sang man confirm.
+     * Validate dữ liệu thêm mới hoặc cập nhật nhân viên trước khi chuyển sang màn confirm.
      *
-     * @param request du lieu nhan vien can validate
-     * @return response thanh cong hoac loi validate
+     * @param request dữ liệu nhân viên cần validate
+     * @return response thành công hoặc response chứa lỗi validate
      */
     @PostMapping("/validate")
     public ResponseEntity<EmployeeValidationResponse> validateEmployeeInput(
             @RequestBody(required = false) EmployeeValidationRequest request
     ) {
         try {
+            // Nếu request body rỗng thì trả ra message lỗi.
             if (request == null) {
                 return ResponseEntity.ok(EmployeeValidationResponse.error("ER023", Collections.emptyList()));
             }
 
+            // Validate dữ liệu nhập từ màn ADM004 trước khi cho sang màn ADM005.
             ErrorResponse validationError = employeeValidator.validate(request);
+
+            // Nếu có lỗi validate thì trả mã lỗi và params để frontend hiển thị message.
             if (!validationError.isValid()) {
                 return ResponseEntity.ok(
                         EmployeeValidationResponse.error(
@@ -164,28 +187,34 @@ public class EmployeeController {
                 );
             }
 
+            // Không có lỗi validate thì trả response thành công.
             return ResponseEntity.ok(EmployeeValidationResponse.success());
         } catch (Exception exception) {
+            // Nếu có lỗi ngoài dự kiến thì trả lỗi hệ thống ER023.
             return ResponseEntity.ok(EmployeeValidationResponse.error("ER023", Collections.emptyList()));
         }
     }
 
     /**
-     * Them moi nhan vien sau khi validate lai du lieu submit.
+     * Thêm mới nhân viên sau khi validate lại dữ liệu submit.
      *
-     * @param request du lieu nhan vien can them moi
-     * @return response thanh cong hoac loi validate/he thong
+     * @param request dữ liệu nhân viên cần thêm mới
+     * @return response thành công hoặc response chứa lỗi validate/hệ thống
      */
     @PostMapping
     public ResponseEntity<EmployeeValidationResponse> addEmployee(
             @RequestBody(required = false) EmployeeValidationRequest request
     ) {
         try {
+            // Nếu request body rỗng thì coi là lỗi hệ thống.
             if (request == null) {
                 return ResponseEntity.ok(EmployeeValidationResponse.error("ER023", Collections.emptyList()));
             }
 
+            // Validate lại dữ liệu trước khi thêm mới để tránh dữ liệu không hợp lệ được lưu.
             ErrorResponse validationError = employeeValidator.validate(request);
+
+            // Nếu có lỗi validate thì trả lỗi cho frontend.
             if (!validationError.isValid()) {
                 return ResponseEntity.ok(
                         EmployeeValidationResponse.error(
@@ -195,33 +224,44 @@ public class EmployeeController {
                 );
             }
 
+            // Thêm mới nhân viên và thông tin chứng chỉ nếu có.
             employeeService.addEmployee(request);
+
+            // Trả response thành công cho màn ADM005 để chuyển sang ADM006.
             return ResponseEntity.ok(EmployeeValidationResponse.success());
         } catch (Exception exception) {
+            // Nếu có lỗi ngoài dự kiến thì trả lỗi hệ thống ER023.
             return ResponseEntity.ok(EmployeeValidationResponse.error("ER023", Collections.emptyList()));
         }
     }
 
     /**
-     * Cap nhat nhan vien sau khi validate lai du lieu submit.
+     * Cập nhật nhân viên sau khi validate lại dữ liệu submit.
      *
-     * @param employeeId ID nhan vien can cap nhat
-     * @param request du lieu nhan vien can cap nhat
-     * @return response thanh cong hoac loi validate/he thong
+     * @param request dữ liệu nhân viên cần cập nhật
+     * @return response thành công hoặc response chứa lỗi validate/hệ thống
      */
-    @PutMapping("/{employeeId}")
+    @PutMapping
     public ResponseEntity<EmployeeValidationResponse> updateEmployee(
-            @PathVariable Long employeeId,
             @RequestBody(required = false) EmployeeValidationRequest request
     ) {
         try {
+            // Nếu request body rỗng thì coi là lỗi hệ thống.
             if (request == null) {
                 return ResponseEntity.ok(EmployeeValidationResponse.error("ER023", Collections.emptyList()));
             }
 
-            request.setEmployeeId(String.valueOf(employeeId));
+            // API update theo tài liệu nhận employeeId trong body, không nhận trên URL.
+            if (request.getEmployeeId() == null || request.getEmployeeId().isBlank()) {
+                return ResponseEntity.ok(EmployeeValidationResponse.error("ER023", Collections.emptyList()));
+            }
 
+            Long employeeId = Long.parseLong(request.getEmployeeId().trim());
+
+            // Validate lại dữ liệu trước khi cập nhật.
             ErrorResponse validationError = employeeValidator.validate(request);
+
+            // Nếu có lỗi validate thì trả lỗi cho frontend.
             if (!validationError.isValid()) {
                 return ResponseEntity.ok(
                         EmployeeValidationResponse.error(
@@ -231,10 +271,15 @@ public class EmployeeController {
                 );
             }
 
+            // Cập nhật nhân viên và ghi lại thông tin chứng chỉ nếu có.
             employeeService.updateEmployee(employeeId, request);
+
+            // Trả response thành công cho màn ADM005 để chuyển sang ADM006.
             return ResponseEntity.ok(EmployeeValidationResponse.success());
         } catch (Exception exception) {
+            // Nếu có lỗi ngoài dự kiến thì trả lỗi hệ thống ER023.
             return ResponseEntity.ok(EmployeeValidationResponse.error("ER023", Collections.emptyList()));
         }
     }
 }
+

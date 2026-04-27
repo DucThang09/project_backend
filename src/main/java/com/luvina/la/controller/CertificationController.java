@@ -16,11 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Controller xử lý API chứng chỉ.
+ * Cung cấp danh sách chứng chỉ để màn hình thêm/sửa nhân viên sử dụng.
  */
 @RestController
 @RequestMapping("/certification")
 public class CertificationController {
 
+    /** Service xử lý nghiệp vụ lấy danh sách chứng chỉ. */
     private final CertificationService certificationService;
 
     /**
@@ -33,7 +35,7 @@ public class CertificationController {
     }
 
     /**
-     * Lấy danh sách chứng chỉ.
+     * Lấy danh sách chứng chỉ đang có trong hệ thống.
      *
      * @return response chứa danh sách chứng chỉ hoặc lỗi hệ thống
      */
