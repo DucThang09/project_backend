@@ -16,7 +16,6 @@ public class EmployeeSearchValidator {
     private static final String LIMIT_PARAM_NAME = "\u30ea\u30df\u30c3\u30c8";
 
     public EmployeeSearchValidationResult validate(
-            String employeeName,
             String ordEmployeeName,
             String ordCertificationName,
             String ordEndDate,
@@ -42,8 +41,7 @@ public class EmployeeSearchValidator {
             return EmployeeSearchValidationResult.invalid("ER018", List.of(LIMIT_PARAM_NAME));
         }
 
-        // Chuẩn hóa tên nhân viên trước khi đưa xuống service/repository.
-        return EmployeeSearchValidationResult.valid(normalizeEmployeeName(employeeName), offset, limit);
+        return EmployeeSearchValidationResult.valid(offset, limit);
     }
 
     // Giá trị sort để trống được chấp nhận, chỉ báo lỗi khi khác ASC/DESC.
@@ -88,18 +86,12 @@ public class EmployeeSearchValidator {
         return value == null || value.trim().isEmpty();
     }
 
-    // Tên tìm kiếm chỉ trim khoảng trắng, rỗng thì coi như không lọc.
-    private String normalizeEmployeeName(String employeeName) {
-        return isEmpty(employeeName) ? null : employeeName.trim();
-    }
-
-    // Gói kết quả validate để controller dùng lại thông tin đã chuẩn hóa.
+    // Gói kết quả validate để controller dùng lại thông tin phân trang đã kiểm tra.
     public static class EmployeeSearchValidationResult {
 
         private final boolean valid;
         private final String errorCode;
         private final List<String> errorParams;
-        private final String normalizedEmployeeName;
         private final Integer offset;
         private final Integer limit;
 
@@ -107,21 +99,18 @@ public class EmployeeSearchValidator {
                 boolean valid,
                 String errorCode,
                 List<String> errorParams,
-                String normalizedEmployeeName,
                 Integer offset,
                 Integer limit
         ) {
             this.valid = valid;
             this.errorCode = errorCode;
             this.errorParams = errorParams;
-            this.normalizedEmployeeName = normalizedEmployeeName;
             this.offset = offset;
             this.limit = limit;
         }
 
-        // Trả về kết quả hợp lệ kèm dữ liệu đã chuẩn hóa.
+        // Trả về kết quả hợp lệ kèm dữ liệu phân trang đã kiểm tra.
         public static EmployeeSearchValidationResult valid(
-                String normalizedEmployeeName,
                 Integer offset,
                 Integer limit
         ) {
@@ -129,7 +118,6 @@ public class EmployeeSearchValidator {
                     true,
                     null,
                     Collections.emptyList(),
-                    normalizedEmployeeName,
                     offset,
                     limit
             );
@@ -137,7 +125,7 @@ public class EmployeeSearchValidator {
 
         // Trả về kết quả không hợp lệ kèm mã lỗi và tham số lỗi.
         public static EmployeeSearchValidationResult invalid(String errorCode, List<String> errorParams) {
-            return new EmployeeSearchValidationResult(false, errorCode, errorParams, null, null, null);
+            return new EmployeeSearchValidationResult(false, errorCode, errorParams, null, null);
         }
 
         public boolean isValid() {
@@ -150,10 +138,6 @@ public class EmployeeSearchValidator {
 
         public List<String> getErrorParams() {
             return errorParams;
-        }
-
-        public String getNormalizedEmployeeName() {
-            return normalizedEmployeeName;
         }
 
         public Integer getOffset() {

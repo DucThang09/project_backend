@@ -1,6 +1,7 @@
 package com.luvina.la.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -257,12 +258,35 @@ class EmployeeServiceImplTest {
 
         when(employeeRepository.findById(30L)).thenReturn(Optional.of(employee));
         when(departmentRepository.findById(2L)).thenReturn(Optional.of(department));
-        when(passwordEncoder.encode("secret123")).thenReturn("encoded-password");
-
         employeeService.updateEmployee(30L, request);
 
         verify(employeeCertificationRepository).deleteByEmployeeEmployeeId(30L);
         verify(certificationRepository, never()).findById(any());
+    }
+
+    @Test
+    void shouldDeleteEmployeeAndCertification() {
+        Employee employee = new Employee();
+        employee.setEmployeeId(30L);
+        employee.setRole("USER");
+        when(employeeRepository.findById(30L)).thenReturn(Optional.of(employee));
+
+        boolean result = employeeService.deleteEmployee(30L);
+
+        assertTrue(result);
+        verify(employeeCertificationRepository).deleteByEmployeeEmployeeId(30L);
+        verify(employeeRepository).delete(employee);
+    }
+
+    @Test
+    void shouldReturnFalseWhenDeleteEmployeeDoesNotExist() {
+        when(employeeRepository.findById(30L)).thenReturn(Optional.empty());
+
+        boolean result = employeeService.deleteEmployee(30L);
+
+        assertFalse(result);
+        verify(employeeCertificationRepository, never()).deleteByEmployeeEmployeeId(30L);
+        verify(employeeRepository, never()).delete(any());
     }
 
     private EmployeeValidationRequest createRequest() {
@@ -270,15 +294,15 @@ class EmployeeServiceImplTest {
         request.setDepartmentId("2");
         request.setEmployeeName("Test User");
         request.setEmployeeNameKana("ﾃｽﾄ");
-        request.setEmployeeBirthDate("2000-01-01");
+        request.setEmployeeBirthDate("2000/01/01");
         request.setEmployeeEmail("test@example.com");
         request.setEmployeeTelephone("0123456789");
         request.setEmployeeLoginId("user01");
         request.setEmployeeLoginPassword("secret123");
         request.setEmployeeLoginPasswordConfirm("secret123");
         request.setCertificationId("1");
-        request.setCertificationStartDate("2020-01-01");
-        request.setCertificationEndDate("2022-01-01");
+        request.setCertificationStartDate("2020/01/01");
+        request.setCertificationEndDate("2022/01/01");
         request.setScore("850");
         return request;
     }

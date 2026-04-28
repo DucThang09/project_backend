@@ -27,7 +27,6 @@ class EmployeeSearchValidatorTest {
     @Test
     void shouldAcceptNullOrBlankSortOrders() {
         EmployeeSearchValidationResult result = validator.validate(
-                "  Alice  ",
                 null,
                 "",
                 "   ",
@@ -36,7 +35,6 @@ class EmployeeSearchValidatorTest {
         );
 
         assertTrue(result.isValid());
-        assertEquals("Alice", result.getNormalizedEmployeeName());
         assertEquals(Constants.DEFAULT_OFFSET, result.getOffset());
         assertEquals(Constants.DEFAULT_LIMIT, result.getLimit());
     }
@@ -44,7 +42,6 @@ class EmployeeSearchValidatorTest {
     @Test
     void shouldRejectInvalidSortOrder() {
         EmployeeSearchValidationResult result = validator.validate(
-                "Alice",
                 "UP",
                 "ASC",
                 "DESC",
@@ -62,7 +59,6 @@ class EmployeeSearchValidatorTest {
     @Test
     void shouldRejectNegativeOffset() {
         EmployeeSearchValidationResult result = validator.validate(
-                "Alice",
                 "ASC",
                 "ASC",
                 "ASC",
@@ -78,7 +74,6 @@ class EmployeeSearchValidatorTest {
     @Test
     void shouldRejectNonNumericOffset() {
         EmployeeSearchValidationResult result = validator.validate(
-                "Alice",
                 "ASC",
                 "ASC",
                 "ASC",
@@ -94,7 +89,6 @@ class EmployeeSearchValidatorTest {
     @Test
     void shouldRejectInvalidLimit() {
         EmployeeSearchValidationResult result = validator.validate(
-                "Alice",
                 "ASC",
                 "ASC",
                 "ASC",
@@ -110,7 +104,6 @@ class EmployeeSearchValidatorTest {
     @Test
     void shouldRejectNonNumericLimit() {
         EmployeeSearchValidationResult result = validator.validate(
-                "Alice",
                 "ASC",
                 "ASC",
                 "ASC",
@@ -124,9 +117,8 @@ class EmployeeSearchValidatorTest {
     }
 
     @Test
-    void shouldNormalizeBlankEmployeeNameToNull() {
+    void shouldAcceptValidPagination() {
         EmployeeSearchValidationResult result = validator.validate(
-                "   ",
                 "ASC",
                 "DESC",
                 "ASC",
@@ -135,7 +127,6 @@ class EmployeeSearchValidatorTest {
         );
 
         assertTrue(result.isValid());
-        assertNull(result.getNormalizedEmployeeName());
         assertEquals(5, result.getOffset());
         assertEquals(10, result.getLimit());
     }

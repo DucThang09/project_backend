@@ -31,7 +31,7 @@ public class Constants {
     public static final String SCORE = "点数";
 
     public static final Pattern ACCOUNT_NAME_PATTERN = Pattern.compile("^[A-Za-z_][A-Za-z0-9_]*$");
-    public static final Pattern KATAKANA_PATTERN = Pattern.compile("^[\\u30a1-\\u30f6\\u30fc]+$");
+    public static final Pattern KATAKANA_PATTERN = Pattern.compile("^[\\uFF66-\\uFF9D\\uFF9E\\uFF9F]+$");
     public static final Pattern HALF_WIDTH_PATTERN = Pattern.compile("^[\\x20-\\x7E]+$");
     public static final Pattern POSITIVE_INTEGER_PATTERN = Pattern.compile("^[1-9]\\d*$");
     public static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");

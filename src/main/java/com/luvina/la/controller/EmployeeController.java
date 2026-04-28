@@ -1,7 +1,12 @@
 package com.luvina.la.controller;
-
+/**
+ * Copyright(C) 2026 Luvina Software Company
+ * <p>
+ * DepartmentController.java, April 13, 2026 tdthang
+ */
 import com.luvina.la.dto.EmployeeDTO;
 import com.luvina.la.dto.EmployeeDetailDTO;
+import com.luvina.la.payload.EmployeeDeleteResponse;
 import com.luvina.la.payload.EmployeeDetailResponse;
 import com.luvina.la.payload.EmployeeListResponse;
 import com.luvina.la.payload.EmployeeValidationRequest;
@@ -15,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,7 +38,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/employee")
 public class EmployeeController {
 
-    /** Service xử lý nghiệp vụ và truy vấn dữ liệu nhân viên. */
+    private static final String ID_PARAM_NAME = "ＩＤ";
+
+    /** Service xử lý truy vấn dữ liệu nhân viên. */
     private final EmployeeService employeeService;
 
     /** Validator kiểm tra tham số tìm kiếm danh sách nhân viên. */
@@ -83,7 +91,6 @@ public class EmployeeController {
         try {
             // Kiểm tra các tham số tìm kiếm, sắp xếp và phân trang trước khi query DB.
             EmployeeSearchValidationResult validationResult = employeeSearchValidator.validate(
-                    employeeName,
                     ordEmployeeName,
                     ordCertificationName,
                     ordEndDate,
@@ -101,11 +108,8 @@ public class EmployeeController {
                 );
             }
 
-            // Lấy tên nhân viên đã được chuẩn hóa để dùng thống nhất cho count và search.
-            String normalizedName = validationResult.getNormalizedEmployeeName();
-
             // Đếm tổng số nhân viên thỏa mãn điều kiện tìm kiếm.
-            Long totalRecords = employeeService.getTotalEmployees(departmentId, normalizedName);
+            Long totalRecords = employeeService.getTotalEmployees(departmentId, employeeName);
 
             // Nếu không có bản ghi nào thì trả danh sách rỗng kèm message MSG005.
             if (totalRecords == 0) {
@@ -117,7 +121,7 @@ public class EmployeeController {
             // Lấy danh sách nhân viên theo điều kiện đã validate, kèm sắp xếp và phân trang.
             List<EmployeeDTO> employees = employeeService.getEmployees(
                     departmentId,
-                    normalizedName,
+                    employeeName,
                     ordEmployeeName,
                     ordCertificationName,
                     ordEndDate,
@@ -145,7 +149,7 @@ public class EmployeeController {
             // Lấy thông tin chi tiết nhân viên theo ID từ service.
             Optional<EmployeeDetailDTO> employeeDetail = employeeService.getEmployeeDetail(employeeId);
 
-            // Nếu không tìm thấy nhân viên hoặc nhân viên không được phép hiển thị thì trả lỗi hệ thống.
+            // Nếu không tìm thấy nhân viên thì trả lỗi hệ thống.
             if (employeeDetail.isEmpty()) {
                 return ResponseEntity.ok(EmployeeDetailResponse.error("ER023", Collections.emptyList()));
             }
@@ -169,13 +173,8 @@ public class EmployeeController {
             @RequestBody(required = false) EmployeeValidationRequest request
     ) {
         try {
-            // Nếu request body rỗng thì trả ra message lỗi.
-            if (request == null) {
-                return ResponseEntity.ok(EmployeeValidationResponse.error("ER023", Collections.emptyList()));
-            }
-
             // Validate dữ liệu nhập từ màn ADM004 trước khi cho sang màn ADM005.
-            ErrorResponse validationError = employeeValidator.validate(request);
+            ErrorResponse validationError = employeeValidator.validateForConfirm(request);
 
             // Nếu có lỗi validate thì trả mã lỗi và params để frontend hiển thị message.
             if (!validationError.isValid()) {
@@ -187,16 +186,16 @@ public class EmployeeController {
                 );
             }
 
-            // Không có lỗi validate thì trả response thành công.
+            // Không có lỗi validate thì response thành công.
             return ResponseEntity.ok(EmployeeValidationResponse.success());
         } catch (Exception exception) {
-            // Nếu có lỗi ngoài dự kiến thì trả lỗi hệ thống ER023.
+            // Nếu có lỗi thì trả lỗi hệ thống ER023.
             return ResponseEntity.ok(EmployeeValidationResponse.error("ER023", Collections.emptyList()));
         }
     }
 
     /**
-     * Thêm mới nhân viên sau khi validate lại dữ liệu submit.
+     * Thêm mới nhân viên sau khi validate lại dữ liệu.
      *
      * @param request dữ liệu nhân viên cần thêm mới
      * @return response thành công hoặc response chứa lỗi validate/hệ thống
@@ -206,13 +205,8 @@ public class EmployeeController {
             @RequestBody(required = false) EmployeeValidationRequest request
     ) {
         try {
-            // Nếu request body rỗng thì coi là lỗi hệ thống.
-            if (request == null) {
-                return ResponseEntity.ok(EmployeeValidationResponse.error("ER023", Collections.emptyList()));
-            }
-
             // Validate lại dữ liệu trước khi thêm mới để tránh dữ liệu không hợp lệ được lưu.
-            ErrorResponse validationError = employeeValidator.validate(request);
+            ErrorResponse validationError = employeeValidator.validateForAdd(request);
 
             // Nếu có lỗi validate thì trả lỗi cho frontend.
             if (!validationError.isValid()) {
@@ -246,20 +240,8 @@ public class EmployeeController {
             @RequestBody(required = false) EmployeeValidationRequest request
     ) {
         try {
-            // Nếu request body rỗng thì coi là lỗi hệ thống.
-            if (request == null) {
-                return ResponseEntity.ok(EmployeeValidationResponse.error("ER023", Collections.emptyList()));
-            }
-
-            // API update theo tài liệu nhận employeeId trong body, không nhận trên URL.
-            if (request.getEmployeeId() == null || request.getEmployeeId().isBlank()) {
-                return ResponseEntity.ok(EmployeeValidationResponse.error("ER023", Collections.emptyList()));
-            }
-
-            Long employeeId = Long.parseLong(request.getEmployeeId().trim());
-
             // Validate lại dữ liệu trước khi cập nhật.
-            ErrorResponse validationError = employeeValidator.validate(request);
+            ErrorResponse validationError = employeeValidator.validateForEdit(request);
 
             // Nếu có lỗi validate thì trả lỗi cho frontend.
             if (!validationError.isValid()) {
@@ -272,6 +254,7 @@ public class EmployeeController {
             }
 
             // Cập nhật nhân viên và ghi lại thông tin chứng chỉ nếu có.
+            Long employeeId = Long.parseLong(request.getEmployeeId());
             employeeService.updateEmployee(employeeId, request);
 
             // Trả response thành công cho màn ADM005 để chuyển sang ADM006.
@@ -279,6 +262,45 @@ public class EmployeeController {
         } catch (Exception exception) {
             // Nếu có lỗi ngoài dự kiến thì trả lỗi hệ thống ER023.
             return ResponseEntity.ok(EmployeeValidationResponse.error("ER023", Collections.emptyList()));
+        }
+    }
+
+    @DeleteMapping
+    public ResponseEntity<EmployeeDeleteResponse> deleteEmployee(
+            @RequestParam(name = "employeeId", required = false) String employeeId
+    ) {
+        try {
+            // Kiểm tra tham số employeeId bắt buộc.
+            if (employeeId == null) {
+                return ResponseEntity.ok(
+                        EmployeeDeleteResponse.error(employeeId, "ER001", List.of(ID_PARAM_NAME))
+                );
+            }
+
+            // Chuyển employeeId từ chuỗi sang Long để service/database xử lý.
+            // trả ER014 nếu nhân viên không tồn tại.
+            Long employeeIdValue;
+            try {
+                employeeIdValue = Long.parseLong(employeeId);
+            } catch (NumberFormatException exception) {
+                return ResponseEntity.ok(
+                        EmployeeDeleteResponse.error(employeeId, "ER014", List.of(ID_PARAM_NAME))
+                );
+            }
+            boolean deleted = employeeService.deleteEmployee(employeeIdValue);
+            if (!deleted) {
+                return ResponseEntity.ok(
+                        EmployeeDeleteResponse.error(employeeId, "ER014", List.of(ID_PARAM_NAME))
+                );
+            }
+
+            // Trả response thành công khi xóa hoàn tất.
+            return ResponseEntity.ok(EmployeeDeleteResponse.success(employeeId));
+        } catch (Exception exception) {
+            // Trả lỗi hệ thống khi có exception ngoài dự kiến.
+            return ResponseEntity.ok(
+                    EmployeeDeleteResponse.error(employeeId, "ER023", Collections.emptyList())
+            );
         }
     }
 }

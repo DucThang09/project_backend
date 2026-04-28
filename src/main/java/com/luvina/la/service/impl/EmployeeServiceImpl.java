@@ -15,6 +15,7 @@ import com.luvina.la.repository.EmployeeRepository;
 import com.luvina.la.service.EmployeeService;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -25,6 +26,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
+
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
     /** Repository truy cập dữ liệu nhân viên. */
     private final EmployeeRepository employeeRepository;
@@ -189,6 +192,26 @@ public class EmployeeServiceImpl implements EmployeeService {
         replaceCertification(employee, request);
     }
 
+    @Override
+    @Transactional
+    public boolean deleteEmployee(Long employeeId) {
+        Optional<Employee> employeeOptional = employeeRepository.findById(employeeId);
+        if (employeeOptional.isEmpty()) {
+            return false;
+        }
+
+        Employee employee = employeeOptional.get();
+
+        String role = employee.getRole() == null ? "USER" : employee.getRole().trim().toUpperCase();
+        if ("ADMIN".equals(role)) {
+            throw new IllegalArgumentException("Cannot delete admin employee");
+        }
+
+        employeeCertificationRepository.deleteByEmployeeEmployeeId(employeeId);
+        employeeRepository.delete(employee);
+        return true;
+    }
+
     /**
      * Map các giá trị từ request sang entity Employee.
      *
@@ -209,7 +232,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setDepartment(department);
         employee.setEmployeeName(request.getEmployeeName().trim());
         employee.setEmployeeNameKana(request.getEmployeeNameKana().trim());
-        employee.setEmployeeBirthDate(LocalDate.parse(request.getEmployeeBirthDate().trim()));
+        employee.setEmployeeBirthDate(LocalDate.parse(request.getEmployeeBirthDate().trim(), DATE_FORMATTER));
         employee.setEmployeeEmail(request.getEmployeeEmail().trim());
         employee.setEmployeeTelephone(request.getEmployeeTelephone().trim());
 
@@ -250,8 +273,8 @@ public class EmployeeServiceImpl implements EmployeeService {
         EmployeeCertification employeeCertification = new EmployeeCertification();
         employeeCertification.setEmployee(employee);
         employeeCertification.setCertification(certification);
-        employeeCertification.setStartDate(LocalDate.parse(request.getCertificationStartDate().trim()));
-        employeeCertification.setEndDate(LocalDate.parse(request.getCertificationEndDate().trim()));
+        employeeCertification.setStartDate(LocalDate.parse(request.getCertificationStartDate().trim(), DATE_FORMATTER));
+        employeeCertification.setEndDate(LocalDate.parse(request.getCertificationEndDate().trim(), DATE_FORMATTER));
         employeeCertification.setScore(new BigDecimal(request.getScore().trim()));
         employeeCertificationRepository.save(employeeCertification);
     }

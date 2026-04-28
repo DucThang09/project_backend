@@ -40,13 +40,84 @@ class EmployeeValidatorTest {
     }
 
     @Test
-    void shouldReturnRequiredErrorWhenLoginIdIsBlank() {
+    void shouldReturnRequiredErrorWhenLoginIdIsEmpty() {
+        EmployeeValidationRequest request = validRequest();
+        request.setEmployeeLoginId("");
+
+        ErrorResponse result = validator.validate(request);
+
+        assertEquals("ER001", result.getCode());
+    }
+
+    @Test
+    void shouldReturnFormatErrorWhenLoginIdIsWhitespace() {
         EmployeeValidationRequest request = validRequest();
         request.setEmployeeLoginId(" ");
 
         ErrorResponse result = validator.validate(request);
 
-        assertEquals("ER001", result.getCode());
+        assertEquals("ER019", result.getCode());
+    }
+
+    @Test
+    void shouldReturnEr023WhenAddRequestIsNull() {
+        ErrorResponse result = validator.validateForAdd(null);
+
+        assertEquals("ER023", result.getCode());
+    }
+
+    @Test
+    void shouldReturnEr023WhenEditRequestIsNull() {
+        ErrorResponse result = validator.validateForEdit(null);
+
+        assertEquals("ER023", result.getCode());
+    }
+
+    @Test
+    void shouldReturnEr023WhenEditEmployeeIdIsBlank() {
+        EmployeeValidationRequest request = validRequest();
+        request.setEmployeeId(" ");
+
+        ErrorResponse result = validator.validateForEdit(request);
+
+        assertEquals("ER023", result.getCode());
+    }
+
+    @Test
+    void shouldReturnEr023WhenEditEmployeeIdIsNonNumeric() {
+        EmployeeValidationRequest request = validRequest();
+        request.setEmployeeId("abc");
+
+        ErrorResponse result = validator.validateForEdit(request);
+
+        assertEquals("ER023", result.getCode());
+    }
+
+    @Test
+    void shouldValidateAccountAndPasswordForAddEvenWhenEmployeeIdExists() {
+        EmployeeValidationRequest request = validRequest();
+        request.setEmployeeId("1");
+        request.setEmployeeLoginId(" ");
+        request.setEmployeeLoginPassword("");
+
+        ErrorResponse result = validator.validateForAdd(request);
+
+        assertEquals("ER019", result.getCode());
+    }
+
+    @Test
+    void shouldSkipAccountAndPasswordForValidEdit() {
+        EmployeeValidationRequest request = validRequest();
+        request.setEmployeeId("1");
+        request.setEmployeeLoginId(" ");
+        request.setEmployeeLoginPassword("");
+        when(departmentRepository.existsById(1L)).thenReturn(true);
+        when(certificationRepository.existsById(1L)).thenReturn(true);
+
+        ErrorResponse result = validator.validateForEdit(request);
+
+        assertTrue(result.isValid());
+        assertEquals("200", result.getCode());
     }
 
     @Test
@@ -97,12 +168,37 @@ class EmployeeValidatorTest {
         assertEquals("200", result.getCode());
     }
 
+    @Test
+    void shouldAcceptHalfWidthKatakanaNameKana() {
+        EmployeeValidationRequest request = validRequest();
+        request.setEmployeeNameKana("\uff76\uff80\uff76\uff85");
+        when(employeeRepository.findByEmployeeLoginId("user01")).thenReturn(Optional.empty());
+        when(departmentRepository.existsById(1L)).thenReturn(true);
+        when(certificationRepository.existsById(1L)).thenReturn(true);
+
+        ErrorResponse result = validator.validate(request);
+
+        assertTrue(result.isValid());
+        assertEquals("200", result.getCode());
+    }
+
+    @Test
+    void shouldReturnEr009WhenNameKanaIsFullWidthKatakana() {
+        EmployeeValidationRequest request = validRequest();
+        request.setEmployeeNameKana("\u30ab\u30bf\u30ab\u30ca");
+        when(employeeRepository.findByEmployeeLoginId("user01")).thenReturn(Optional.empty());
+
+        ErrorResponse result = validator.validate(request);
+
+        assertEquals("ER009", result.getCode());
+    }
+
     private EmployeeValidationRequest validRequest() {
         EmployeeValidationRequest request = new EmployeeValidationRequest();
         request.setEmployeeLoginId("user01");
         request.setDepartmentId("1");
         request.setEmployeeName("Test User");
-        request.setEmployeeNameKana("\u30c6\u30b9\u30c8");
+        request.setEmployeeNameKana("\uff83\uff7d\uff84");
         request.setEmployeeBirthDate("2000/01/01");
         request.setEmployeeEmail("test@example.com");
         request.setEmployeeTelephone("0123456789");

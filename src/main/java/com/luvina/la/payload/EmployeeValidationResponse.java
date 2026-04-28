@@ -79,6 +79,12 @@ public class EmployeeValidationResponse {
     }
 
     /**
+     * Táº¡o response thÃ nh cÃ´ng kÃ¨m message.
+     *
+     * @param messageCode mÃ£ message tráº£ vá» cho frontend
+     * @return response vá»›i mÃ£ 200 vÃ  message
+     */
+    /**
      * Tạo response lỗi.
      *
      * @param errorCode mã lỗi

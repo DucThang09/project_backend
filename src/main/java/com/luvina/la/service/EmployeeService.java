@@ -64,4 +64,11 @@ public interface EmployeeService {
      * @param request du lieu nhan vien da duoc validate
      */
     void updateEmployee(Long employeeId, EmployeeValidationRequest request);
+
+    /**
+     * Xoa nhan vien theo ID.
+     *
+     * @param employeeId ID nhan vien can xoa
+     */
+    boolean deleteEmployee(Long employeeId);
 }
