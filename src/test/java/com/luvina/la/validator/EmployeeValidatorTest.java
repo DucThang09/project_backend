@@ -199,14 +199,14 @@ class EmployeeValidatorTest {
         request.setDepartmentId("1");
         request.setEmployeeName("Test User");
         request.setEmployeeNameKana("\uff83\uff7d\uff84");
-        request.setEmployeeBirthDate("2000/01/01");
+        request.setEmployeeBirthDate("2000-01-01");
         request.setEmployeeEmail("test@example.com");
         request.setEmployeeTelephone("0123456789");
         request.setEmployeeLoginPassword("secret123");
         request.setEmployeeLoginPasswordConfirm("secret123");
         request.setCertificationId("1");
-        request.setCertificationStartDate("2020/01/01");
-        request.setCertificationEndDate("2022/01/01");
+        request.setCertificationStartDate("2020-01-01");
+        request.setCertificationEndDate("2022-01-01");
         request.setScore("850");
         return request;
     }

@@ -28,7 +28,6 @@ import com.luvina.la.repository.CertificationRepository;
 import com.luvina.la.repository.DepartmentRepository;
 import com.luvina.la.repository.EmployeeRepository;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Collections;
 import java.util.List;
@@ -43,7 +42,6 @@ import org.springframework.stereotype.Component;
 public class EmployeeValidator {
 
     private static final String HALFSIZE_NUMBER_PATTERN = "^[0-9]*$";
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
     private final EmployeeRepository employeeRepository;
     private final DepartmentRepository departmentRepository;
@@ -267,7 +265,7 @@ public class EmployeeValidator {
     }
 
     /**
-     * Kiểm tra định dạng ngày tháng yyyy/MM/dd.
+     * Kiểm tra định dạng ngày tháng ISO yyyy-MM-dd.
      *
      * @param date Ngày tháng cần kiểm tra
      * @return true nếu hợp lệ, false nếu không hợp lệ
@@ -278,7 +276,7 @@ public class EmployeeValidator {
         }
 
         try {
-            String[] parts = date.split("/");
+            String[] parts = date.split("-");
             if (parts.length != 3) {
                 return false;
             }
@@ -294,7 +292,7 @@ public class EmployeeValidator {
                 return false;
             }
 
-            LocalDate.parse(date, DATE_FORMATTER);
+            LocalDate.parse(date);
             return true;
         } catch (Exception ex) {
             return false;
@@ -404,7 +402,7 @@ public class EmployeeValidator {
         if (trimmedBirthDate.isEmpty()) {
             return buildResponse("ER001", List.of(BIRTH_DATE));
         } else if (!isValidDateFormat(trimmedBirthDate)) {
-            return buildResponse("ER005", List.of(BIRTH_DATE, "yyyy/MM/dd"));
+            return buildResponse("ER005", List.of(BIRTH_DATE, "yyyy-MM-dd"));
         }
         return null;
     }
@@ -556,11 +554,11 @@ public class EmployeeValidator {
         } else if (certificationStartDate == null || certificationStartDate.isEmpty()) {
             return buildResponse("ER001", List.of(CERTIFICATION_START_DATE));
         } else if (!isValidDateFormat(certificationStartDate)) {
-            return buildResponse("ER005", List.of(CERTIFICATION_START_DATE, "yyyy/MM/dd"));
+            return buildResponse("ER005", List.of(CERTIFICATION_START_DATE, "yyyy-MM-dd"));
         } else if (certificationEndDate == null || certificationEndDate.isEmpty()) {
             return buildResponse("ER001", List.of(CERTIFICATION_END_DATE));
         } else if (!isValidDateFormat(certificationEndDate)) {
-            return buildResponse("ER005", List.of(CERTIFICATION_END_DATE, "yyyy/MM/dd"));
+            return buildResponse("ER005", List.of(CERTIFICATION_END_DATE, "yyyy-MM-dd"));
         } else if (score == null || score.isEmpty()) {
             return buildResponse("ER001", List.of(SCORE));
         } else if (!isHalfsizeNumber(score)) {
@@ -570,13 +568,13 @@ public class EmployeeValidator {
             LocalDate end;
             try {
                 // Parse ngày để so sánh ngày hết hạn phải lớn hơn ngày cấp.
-                start = LocalDate.parse(certificationStartDate, DATE_FORMATTER);
-                end = LocalDate.parse(certificationEndDate, DATE_FORMATTER);
+                start = LocalDate.parse(certificationStartDate);
+                end = LocalDate.parse(certificationEndDate);
             } catch (DateTimeParseException ex) {
-                return buildResponse("ER005", List.of(CERTIFICATION_END_DATE, "yyyy/MM/dd"));
+                return buildResponse("ER005", List.of(CERTIFICATION_END_DATE, "yyyy-MM-dd"));
             }
             if (start == null || end == null) {
-                return buildResponse("ER005", List.of(CERTIFICATION_END_DATE, "yyyy/MM/dd"));
+                return buildResponse("ER005", List.of(CERTIFICATION_END_DATE, "yyyy-MM-dd"));
             } else if (!end.isAfter(start)) {
                 // Ngày hết hạn phải sau ngày cấp chứng chỉ.
                 return buildResponse("ER012", Collections.emptyList());

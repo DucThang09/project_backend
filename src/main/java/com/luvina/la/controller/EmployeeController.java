@@ -276,7 +276,6 @@ public class EmployeeController {
                         EmployeeDeleteResponse.error(employeeId, "ER001", List.of(ID_PARAM_NAME))
                 );
             }
-
             // Chuyển employeeId từ chuỗi sang Long để service/database xử lý.
             // trả ER014 nếu nhân viên không tồn tại.
             Long employeeIdValue;
@@ -293,7 +292,6 @@ public class EmployeeController {
                         EmployeeDeleteResponse.error(employeeId, "ER014", List.of(ID_PARAM_NAME))
                 );
             }
-
             // Trả response thành công khi xóa hoàn tất.
             return ResponseEntity.ok(EmployeeDeleteResponse.success(employeeId));
         } catch (Exception exception) {

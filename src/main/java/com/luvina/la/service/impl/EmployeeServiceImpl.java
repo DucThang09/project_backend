@@ -15,7 +15,6 @@ import com.luvina.la.repository.EmployeeRepository;
 import com.luvina.la.service.EmployeeService;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -26,8 +25,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
-
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
     /** Repository truy cập dữ liệu nhân viên. */
     private final EmployeeRepository employeeRepository;
@@ -168,7 +165,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         // Lưu employee trước để có employeeId dùng cho bảng liên kết chứng chỉ.
         Employee savedEmployee = employeeRepository.save(employee);
-        replaceCertification(savedEmployee, request);
+        updateEmployeeCertification(savedEmployee, request);
     }
 
     /**
@@ -189,9 +186,14 @@ public class EmployeeServiceImpl implements EmployeeService {
         employeeRepository.save(employee);
 
         // Ghi đè lại thông tin chứng chỉ theo dữ liệu mới trên form.
-        replaceCertification(employee, request);
+        updateEmployeeCertification(employee, request);
     }
 
+    /**
+     * Xoá nhân viên cần xóa
+     * @param employeeId ID nhan vien can xoa
+     * @return
+     */
     @Override
     @Transactional
     public boolean deleteEmployee(Long employeeId) {
@@ -232,7 +234,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setDepartment(department);
         employee.setEmployeeName(request.getEmployeeName().trim());
         employee.setEmployeeNameKana(request.getEmployeeNameKana().trim());
-        employee.setEmployeeBirthDate(LocalDate.parse(request.getEmployeeBirthDate().trim(), DATE_FORMATTER));
+        employee.setEmployeeBirthDate(LocalDate.parse(request.getEmployeeBirthDate().trim()));
         employee.setEmployeeEmail(request.getEmployeeEmail().trim());
         employee.setEmployeeTelephone(request.getEmployeeTelephone().trim());
 
@@ -241,21 +243,16 @@ public class EmployeeServiceImpl implements EmployeeService {
             employee.setEmployeeLoginId(request.getEmployeeLoginId().trim());
             employee.setEmployeeLoginPassword(passwordEncoder.encode(request.getEmployeeLoginPassword()));
         }
-
-        // Nếu dữ liệu cũ chưa có role thì mặc định là USER.
-        if (employee.getRole() == null || employee.getRole().isBlank()) {
-            employee.setRole("USER");
-        }
     }
 
     /**
-     * Ghi đè thông tin chứng chỉ của nhân viên.
-     * Luồng hiện tại chỉ lưu một chứng chỉ được chọn trên form, nên xóa dữ liệu cũ rồi insert lại.
+     * update thông tin chứng chỉ của nhân viên.
+     * Luồng hiện tại chỉ lưu một chứng chỉ được chọn trên form
      *
      * @param employee nhân viên cần cập nhật chứng chỉ
      * @param request dữ liệu form đã validate
      */
-    private void replaceCertification(Employee employee, EmployeeValidationRequest request) {
+    private void updateEmployeeCertification(Employee employee, EmployeeValidationRequest request) {
         // Xóa toàn bộ chứng chỉ cũ của nhân viên trước khi lưu dữ liệu mới.
         employeeCertificationRepository.deleteByEmployeeEmployeeId(employee.getEmployeeId());
 
@@ -273,8 +270,8 @@ public class EmployeeServiceImpl implements EmployeeService {
         EmployeeCertification employeeCertification = new EmployeeCertification();
         employeeCertification.setEmployee(employee);
         employeeCertification.setCertification(certification);
-        employeeCertification.setStartDate(LocalDate.parse(request.getCertificationStartDate().trim(), DATE_FORMATTER));
-        employeeCertification.setEndDate(LocalDate.parse(request.getCertificationEndDate().trim(), DATE_FORMATTER));
+        employeeCertification.setStartDate(LocalDate.parse(request.getCertificationStartDate().trim()));
+        employeeCertification.setEndDate(LocalDate.parse(request.getCertificationEndDate().trim()));
         employeeCertification.setScore(new BigDecimal(request.getScore().trim()));
         employeeCertificationRepository.save(employeeCertification);
     }
@@ -312,8 +309,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     /**
      * Chọn chứng chỉ đại diện của nhân viên.
-     * Ưu tiên chứng chỉ có level cao hơn, nếu bằng nhau thì lấy ngày hết hạn lớn hơn,
-     * cuối cùng dùng ID liên kết để ổn định kết quả.
+     * Ưu tiên chứng chỉ có level cao hơn, nếu bằng nhau thì lấy ngày hết hạn lớn hơn
      *
      * @param employeeCertifications danh sách chứng chỉ của nhân viên
      * @return chứng chỉ được chọn hoặc null nếu không có dữ liệu hợp lệ
