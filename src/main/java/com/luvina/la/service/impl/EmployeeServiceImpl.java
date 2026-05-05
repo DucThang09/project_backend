@@ -7,7 +7,7 @@ import com.luvina.la.entity.Certification;
 import com.luvina.la.entity.Department;
 import com.luvina.la.entity.Employee;
 import com.luvina.la.entity.EmployeeCertification;
-import com.luvina.la.payload.EmployeeValidationRequest;
+import com.luvina.la.payload.request.EmployeeValidationRequest;
 import com.luvina.la.repository.CertificationRepository;
 import com.luvina.la.repository.DepartmentRepository;
 import com.luvina.la.repository.EmployeeCertificationRepository;
@@ -114,11 +114,11 @@ public class EmployeeServiceImpl implements EmployeeService {
         );
 
         // Convert kết quả native query sang DTO trả về frontend.
-        List<EmployeeDTO> dtos = new ArrayList<>(results.size());
+        List<EmployeeDTO> employeeDtos = new ArrayList<>(results.size());
         for (Object[] row : results) {
-            dtos.add(EmployeeDTO.fromRow(row));
+            employeeDtos.add(EmployeeDTO.fromRow(row));
         }
-        return dtos;
+        return employeeDtos;
     }
 
     /**
@@ -151,42 +151,42 @@ public class EmployeeServiceImpl implements EmployeeService {
     /**
      * Thêm mới nhân viên và chứng chỉ nếu request có chọn chứng chỉ.
      *
-     * @param request dữ liệu nhân viên đã được validate
+     * @param employeeValidationRequest dữ liệu nhân viên đã được validate
      */
     @Override
     @Transactional
-    public void addEmployee(EmployeeValidationRequest request) {
+    public void addEmployee(EmployeeValidationRequest employeeValidationRequest) {
         // Tạo entity mới và map dữ liệu từ request sang entity.
         Employee employee = new Employee();
-        applyEmployeeValues(employee, request, true);
+        applyEmployeeValues(employee, employeeValidationRequest, true);
 
         // Nhân viên tạo từ ADM004 luôn là user thường.
         employee.setRole("USER");
 
         // Lưu employee trước để có employeeId dùng cho bảng liên kết chứng chỉ.
         Employee savedEmployee = employeeRepository.save(employee);
-        updateEmployeeCertification(savedEmployee, request);
+        updateEmployeeCertification(savedEmployee, employeeValidationRequest);
     }
 
     /**
      * Cập nhật nhân viên và ghi đè lại thông tin chứng chỉ hiện tại.
      *
      * @param employeeId ID nhân viên cần cập nhật
-     * @param request dữ liệu nhân viên đã được validate
+     * @param employeeValidationRequest dữ liệu nhân viên đã được validate
      */
     @Override
     @Transactional
-    public void updateEmployee(Long employeeId, EmployeeValidationRequest request) {
+    public void updateEmployee(Long employeeId, EmployeeValidationRequest employeeValidationRequest) {
         // Tìm nhân viên cần sửa, không tồn tại thì throw để controller trả lỗi hệ thống.
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new IllegalArgumentException("Employee not found"));
 
         // Map dữ liệu edit sang entity nhưng giữ nguyên account/password.
-        applyEmployeeValues(employee, request, false);
+        applyEmployeeValues(employee, employeeValidationRequest, false);
         employeeRepository.save(employee);
 
         // Ghi đè lại thông tin chứng chỉ theo dữ liệu mới trên form.
-        updateEmployeeCertification(employee, request);
+        updateEmployeeCertification(employee, employeeValidationRequest);
     }
 
     /**
@@ -218,30 +218,30 @@ public class EmployeeServiceImpl implements EmployeeService {
      * Map các giá trị từ request sang entity Employee.
      *
      * @param employee entity cần cập nhật dữ liệu
-     * @param request dữ liệu form đã validate
+     * @param employeeValidationRequest dữ liệu form đã validate
      * @param updateAccountAndPassword true khi thêm mới, false khi chỉnh sửa
      */
     private void applyEmployeeValues(
             Employee employee,
-            EmployeeValidationRequest request,
+            EmployeeValidationRequest employeeValidationRequest,
             boolean updateAccountAndPassword
     ) {
         // DepartmentId đã được validate tồn tại trước đó, ở đây lấy entity để set quan hệ.
-        Department department = departmentRepository.findById(Long.parseLong(request.getDepartmentId().trim()))
+        Department department = departmentRepository.findById(Long.parseLong(employeeValidationRequest.getDepartmentId().trim()))
                 .orElseThrow(() -> new IllegalArgumentException("Department not found"));
 
         // Các field thông tin cơ bản được cập nhật cho cả add và edit.
         employee.setDepartment(department);
-        employee.setEmployeeName(request.getEmployeeName().trim());
-        employee.setEmployeeNameKana(request.getEmployeeNameKana().trim());
-        employee.setEmployeeBirthDate(LocalDate.parse(request.getEmployeeBirthDate().trim()));
-        employee.setEmployeeEmail(request.getEmployeeEmail().trim());
-        employee.setEmployeeTelephone(request.getEmployeeTelephone().trim());
+        employee.setEmployeeName(employeeValidationRequest.getEmployeeName().trim());
+        employee.setEmployeeNameKana(employeeValidationRequest.getEmployeeNameKana().trim());
+        employee.setEmployeeBirthDate(LocalDate.parse(employeeValidationRequest.getEmployeeBirthDate().trim()));
+        employee.setEmployeeEmail(employeeValidationRequest.getEmployeeEmail().trim());
+        employee.setEmployeeTelephone(employeeValidationRequest.getEmployeeTelephone().trim());
 
         // Khi edit, màn hình chỉ hiển thị account/password dạng disabled nên giữ nguyên dữ liệu cũ.
         if (updateAccountAndPassword) {
-            employee.setEmployeeLoginId(request.getEmployeeLoginId().trim());
-            employee.setEmployeeLoginPassword(passwordEncoder.encode(request.getEmployeeLoginPassword()));
+            employee.setEmployeeLoginId(employeeValidationRequest.getEmployeeLoginId().trim());
+            employee.setEmployeeLoginPassword(passwordEncoder.encode(employeeValidationRequest.getEmployeeLoginPassword()));
         }
     }
 
@@ -250,14 +250,16 @@ public class EmployeeServiceImpl implements EmployeeService {
      * Luồng hiện tại chỉ lưu một chứng chỉ được chọn trên form
      *
      * @param employee nhân viên cần cập nhật chứng chỉ
-     * @param request dữ liệu form đã validate
+     * @param employeeValidationRequest dữ liệu form đã validate
      */
-    private void updateEmployeeCertification(Employee employee, EmployeeValidationRequest request) {
+    private void updateEmployeeCertification(Employee employee, EmployeeValidationRequest employeeValidationRequest) {
         // Xóa toàn bộ chứng chỉ cũ của nhân viên trước khi lưu dữ liệu mới.
         employeeCertificationRepository.deleteByEmployeeEmployeeId(employee.getEmployeeId());
 
         // Nếu form không chọn chứng chỉ thì kết thúc sau khi đã xóa dữ liệu cũ.
-        String certificationId = request.getCertificationId() == null ? "" : request.getCertificationId().trim();
+        String certificationId = employeeValidationRequest.getCertificationId() == null
+                ? ""
+                : employeeValidationRequest.getCertificationId().trim();
         if (certificationId.isEmpty()) {
             return;
         }
@@ -270,9 +272,9 @@ public class EmployeeServiceImpl implements EmployeeService {
         EmployeeCertification employeeCertification = new EmployeeCertification();
         employeeCertification.setEmployee(employee);
         employeeCertification.setCertification(certification);
-        employeeCertification.setStartDate(LocalDate.parse(request.getCertificationStartDate().trim()));
-        employeeCertification.setEndDate(LocalDate.parse(request.getCertificationEndDate().trim()));
-        employeeCertification.setScore(new BigDecimal(request.getScore().trim()));
+        employeeCertification.setStartDate(LocalDate.parse(employeeValidationRequest.getCertificationStartDate().trim()));
+        employeeCertification.setEndDate(LocalDate.parse(employeeValidationRequest.getCertificationEndDate().trim()));
+        employeeCertification.setScore(new BigDecimal(employeeValidationRequest.getScore().trim()));
         employeeCertificationRepository.save(employeeCertification);
     }
 
@@ -283,28 +285,28 @@ public class EmployeeServiceImpl implements EmployeeService {
      * @return DTO chi tiết nhân viên
      */
     private EmployeeDetailDTO toEmployeeDetailDTO(Employee employee) {
-        EmployeeDetailDTO dto = new EmployeeDetailDTO();
-        dto.setEmployeeId(employee.getEmployeeId());
-        dto.setEmployeeLoginId(employee.getEmployeeLoginId());
-        dto.setDepartmentId(employee.getDepartment().getDepartmentId());
-        dto.setDepartmentName(employee.getDepartment().getDepartmentName());
-        dto.setEmployeeName(employee.getEmployeeName());
-        dto.setEmployeeNameKana(employee.getEmployeeNameKana());
-        dto.setEmployeeBirthDate(employee.getEmployeeBirthDate());
-        dto.setEmployeeEmail(employee.getEmployeeEmail());
-        dto.setEmployeeTelephone(employee.getEmployeeTelephone());
+        EmployeeDetailDTO employeeDetailDto = new EmployeeDetailDTO();
+        employeeDetailDto.setEmployeeId(employee.getEmployeeId());
+        employeeDetailDto.setEmployeeLoginId(employee.getEmployeeLoginId());
+        employeeDetailDto.setDepartmentId(employee.getDepartment().getDepartmentId());
+        employeeDetailDto.setDepartmentName(employee.getDepartment().getDepartmentName());
+        employeeDetailDto.setEmployeeName(employee.getEmployeeName());
+        employeeDetailDto.setEmployeeNameKana(employee.getEmployeeNameKana());
+        employeeDetailDto.setEmployeeBirthDate(employee.getEmployeeBirthDate());
+        employeeDetailDto.setEmployeeEmail(employee.getEmployeeEmail());
+        employeeDetailDto.setEmployeeTelephone(employee.getEmployeeTelephone());
 
         // Chọn một chứng chỉ đại diện để hiển thị trong detail/edit.
         EmployeeCertification selectedCertification = selectEmployeeCertification(employee.getEmployeeCertifications());
         if (selectedCertification != null) {
-            dto.setCertificationId(selectedCertification.getCertification().getCertificationId());
-            dto.setCertificationName(selectedCertification.getCertification().getCertificationName());
-            dto.setCertificationStartDate(selectedCertification.getStartDate());
-            dto.setCertificationEndDate(selectedCertification.getEndDate());
-            dto.setScore(selectedCertification.getScore());
+            employeeDetailDto.setCertificationId(selectedCertification.getCertification().getCertificationId());
+            employeeDetailDto.setCertificationName(selectedCertification.getCertification().getCertificationName());
+            employeeDetailDto.setCertificationStartDate(selectedCertification.getStartDate());
+            employeeDetailDto.setCertificationEndDate(selectedCertification.getEndDate());
+            employeeDetailDto.setScore(selectedCertification.getScore());
         }
 
-        return dto;
+        return employeeDetailDto;
     }
 
     /**

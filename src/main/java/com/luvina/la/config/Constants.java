@@ -29,6 +29,7 @@ public class Constants {
     public static final String CERTIFICATION_START_DATE = "資格交付日";
     public static final String CERTIFICATION_END_DATE = "失効日";
     public static final String SCORE = "点数";
+    public static final String ID_PARAM_NAME = "ＩＤ";
 
     public static final Pattern ACCOUNT_NAME_PATTERN = Pattern.compile("^[A-Za-z_][A-Za-z0-9_]*$");
     public static final Pattern KATAKANA_PATTERN = Pattern.compile("^[\\uFF66-\\uFF9D\\uFF9E\\uFF9F]+$");

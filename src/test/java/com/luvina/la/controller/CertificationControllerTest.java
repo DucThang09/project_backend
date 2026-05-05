@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import com.luvina.la.dto.CertificationDTO;
-import com.luvina.la.payload.CertificationResponse;
+import com.luvina.la.payload.response.CertificationResponse;
 import com.luvina.la.service.CertificationService;
 import java.util.Collections;
 import java.util.List;

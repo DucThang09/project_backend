@@ -1,4 +1,4 @@
-package com.luvina.la.payload;
+package com.luvina.la.payload.response;
 /**
  * Copyright(C) 2026 Luvina Software Company
  * <p>

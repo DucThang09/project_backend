@@ -2,7 +2,7 @@ package com.luvina.la.service;
 
 import com.luvina.la.dto.EmployeeDTO;
 import com.luvina.la.dto.EmployeeDetailDTO;
-import com.luvina.la.payload.EmployeeValidationRequest;
+import com.luvina.la.payload.request.EmployeeValidationRequest;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,17 +53,17 @@ public interface EmployeeService {
     /**
      * Them moi nhan vien va thong tin chung chi neu co.
      *
-     * @param request du lieu nhan vien da duoc validate
+     * @param employeeValidationRequest du lieu nhan vien da duoc validate
      */
-    void addEmployee(EmployeeValidationRequest request);
+    void addEmployee(EmployeeValidationRequest employeeValidationRequest);
 
     /**
      * Cap nhat nhan vien theo ID va ghi de lai thong tin chung chi hien tai.
      *
      * @param employeeId ID nhan vien can cap nhat
-     * @param request du lieu nhan vien da duoc validate
+     * @param employeeValidationRequest du lieu nhan vien da duoc validate
      */
-    void updateEmployee(Long employeeId, EmployeeValidationRequest request);
+    void updateEmployee(Long employeeId, EmployeeValidationRequest employeeValidationRequest);
 
     /**
      * Xoa nhan vien theo ID.

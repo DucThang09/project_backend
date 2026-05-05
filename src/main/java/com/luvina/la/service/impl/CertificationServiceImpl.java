@@ -39,15 +39,15 @@ public class CertificationServiceImpl implements CertificationService {
         List<Certification> certifications = certificationRepository.findAllByOrderByCertificationIdAsc();
 
         // Chuyển entity sang DTO để controller trả về đúng dữ liệu cần hiển thị.
-        List<CertificationDTO> dtos = new ArrayList<>(certifications.size());
+        List<CertificationDTO> certificationDtos = new ArrayList<>(certifications.size());
 
         for (Certification certification : certifications) {
-            CertificationDTO dto = new CertificationDTO();
-            dto.setCertificationId(certification.getCertificationId());
-            dto.setCertificationName(certification.getCertificationName());
-            dtos.add(dto);
+            CertificationDTO certificationDto = new CertificationDTO();
+            certificationDto.setCertificationId(certification.getCertificationId());
+            certificationDto.setCertificationName(certification.getCertificationName());
+            certificationDtos.add(certificationDto);
         }
 
-        return dtos;
+        return certificationDtos;
     }
 }

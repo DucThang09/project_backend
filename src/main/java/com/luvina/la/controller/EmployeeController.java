@@ -4,14 +4,16 @@ package com.luvina.la.controller;
  * <p>
  * DepartmentController.java, April 13, 2026 tdthang
  */
+import static com.luvina.la.config.Constants.ID_PARAM_NAME;
+
 import com.luvina.la.dto.EmployeeDTO;
 import com.luvina.la.dto.EmployeeDetailDTO;
-import com.luvina.la.payload.EmployeeDeleteResponse;
-import com.luvina.la.payload.EmployeeDetailResponse;
-import com.luvina.la.payload.EmployeeListResponse;
-import com.luvina.la.payload.EmployeeValidationRequest;
-import com.luvina.la.payload.EmployeeValidationResponse;
-import com.luvina.la.payload.EmployeeValidationResponse.ErrorResponse;
+import com.luvina.la.payload.response.EmployeeDeleteResponse;
+import com.luvina.la.payload.response.EmployeeDetailResponse;
+import com.luvina.la.payload.response.EmployeeListResponse;
+import com.luvina.la.payload.request.EmployeeValidationRequest;
+import com.luvina.la.payload.response.EmployeeValidationResponse;
+import com.luvina.la.payload.response.EmployeeValidationResponse.ErrorResponse;
 import com.luvina.la.service.EmployeeService;
 import com.luvina.la.validator.EmployeeSearchValidator;
 import com.luvina.la.validator.EmployeeSearchValidator.EmployeeSearchValidationResult;
@@ -37,8 +39,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/employee")
 public class EmployeeController {
-
-    private static final String ID_PARAM_NAME = "ＩＤ";
 
     /** Service xử lý truy vấn dữ liệu nhân viên. */
     private final EmployeeService employeeService;

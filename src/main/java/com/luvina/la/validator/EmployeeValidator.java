@@ -5,25 +5,29 @@ package com.luvina.la.validator;
  * EmployeeController.java, April 13, 2026 tdthang
  */
 import static com.luvina.la.config.Constants.ACCOUNT_NAME;
-import static com.luvina.la.config.Constants.ACCOUNT_NAME_PATTERN;
 import static com.luvina.la.config.Constants.BIRTH_DATE;
 import static com.luvina.la.config.Constants.CERTIFICATION;
 import static com.luvina.la.config.Constants.CERTIFICATION_END_DATE;
 import static com.luvina.la.config.Constants.CERTIFICATION_START_DATE;
 import static com.luvina.la.config.Constants.EMAIL;
-import static com.luvina.la.config.Constants.EMAIL_PATTERN;
 import static com.luvina.la.config.Constants.EMPLOYEE_NAME;
 import static com.luvina.la.config.Constants.EMPLOYEE_NAME_KANA;
 import static com.luvina.la.config.Constants.GROUP;
-import static com.luvina.la.config.Constants.KATAKANA_PATTERN;
 import static com.luvina.la.config.Constants.PASSWORD;
 import static com.luvina.la.config.Constants.POSITIVE_INTEGER_PATTERN;
 import static com.luvina.la.config.Constants.SCORE;
 import static com.luvina.la.config.Constants.TELEPHONE;
+import static com.luvina.la.util.ValidationUtils.isHalfsizeNumber;
+import static com.luvina.la.util.ValidationUtils.isValidDateFormat;
+import static com.luvina.la.util.ValidationUtils.isValidEmail;
+import static com.luvina.la.util.ValidationUtils.isValidKatakana;
+import static com.luvina.la.util.ValidationUtils.isValidLoginId;
+import static com.luvina.la.util.ValidationUtils.isValidMaxLength;
+import static com.luvina.la.util.ValidationUtils.isValidMinLength;
 
 import com.luvina.la.entity.Employee;
-import com.luvina.la.payload.EmployeeValidationRequest;
-import com.luvina.la.payload.EmployeeValidationResponse.ErrorResponse;
+import com.luvina.la.payload.request.EmployeeValidationRequest;
+import com.luvina.la.payload.response.EmployeeValidationResponse.ErrorResponse;
 import com.luvina.la.repository.CertificationRepository;
 import com.luvina.la.repository.DepartmentRepository;
 import com.luvina.la.repository.EmployeeRepository;
@@ -32,7 +36,6 @@ import java.time.format.DateTimeParseException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 
 /**
@@ -40,8 +43,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class EmployeeValidator {
-
-    private static final String HALFSIZE_NUMBER_PATTERN = "^[0-9]*$";
 
     private final EmployeeRepository employeeRepository;
     private final DepartmentRepository departmentRepository;
@@ -182,121 +183,6 @@ public class EmployeeValidator {
         }
 
         return null;
-    }
-
-    /**
-     * Kiểm tra độ dài tối đa của chuỗi.
-     *
-     * @param value     Chuỗi cần kiểm tra
-     * @param maxLength Độ dài tối đa
-     * @return true nếu hợp lệ, false nếu không hợp lệ
-     */
-    public boolean isValidMaxLength(String value, int maxLength) {
-        if (value == null) {
-            return true;
-        }
-        return value.length() <= maxLength;
-    }
-
-    /**
-     * Kiểm tra độ dài tối thiểu của chuỗi.
-     *
-     * @param value     Chuỗi cần kiểm tra
-     * @param minLength Độ dài tối thiểu
-     * @return true nếu hợp lệ, false nếu không hợp lệ
-     */
-    public boolean isValidMinLength(String value, int minLength) {
-        if (value == null) {
-            return false;
-        }
-        return value.length() >= minLength;
-    }
-
-    /**
-     * Kiểm tra định dạng Login ID (ER019).
-     *
-     * @param loginId Login ID cần kiểm tra
-     * @return true nếu hợp lệ, false nếu không hợp lệ
-     */
-    public boolean isValidLoginId(String loginId) {
-        if (loginId == null || loginId.isEmpty()) {
-            return true;
-        }
-        return ACCOUNT_NAME_PATTERN.matcher(loginId).matches();
-    }
-
-    /**
-     * Kiểm tra định dạng Email (ER005).
-     *
-     * @param email Email cần kiểm tra
-     * @return true nếu hợp lệ, false nếu không hợp lệ
-     */
-    public boolean isValidEmail(String email) {
-        if (email == null || email.isEmpty()) {
-            return true;
-        }
-        return EMAIL_PATTERN.matcher(email).matches();
-    }
-
-    /**
-     * Kiểm tra định dạng Katakana (ER009).
-     *
-     * @param text Chuỗi cần kiểm tra
-     * @return true nếu hợp lệ, false nếu không hợp lệ
-     */
-    public boolean isValidKatakana(String text) {
-        if (text == null || text.isEmpty()) {
-            return true;
-        }
-        return KATAKANA_PATTERN.matcher(text).matches();
-    }
-
-    /**
-     * Kiểm tra định dạng số Halfsize (ER008/ER018).
-     *
-     * @param text Chuỗi cần kiểm tra
-     * @return true nếu hợp lệ, false nếu không hợp lệ
-     */
-    public boolean isHalfsizeNumber(String text) {
-        if (text == null || text.isEmpty()) {
-            return true;
-        }
-        return Pattern.matches(HALFSIZE_NUMBER_PATTERN, text);
-    }
-
-    /**
-     * Kiểm tra định dạng ngày tháng ISO yyyy-MM-dd.
-     *
-     * @param date Ngày tháng cần kiểm tra
-     * @return true nếu hợp lệ, false nếu không hợp lệ
-     */
-    public boolean isValidDateFormat(String date) {
-        if (date == null || date.isEmpty()) {
-            return true;
-        }
-
-        try {
-            String[] parts = date.split("-");
-            if (parts.length != 3) {
-                return false;
-            }
-
-            Integer.parseInt(parts[0]);
-            int month = Integer.parseInt(parts[1]);
-            int day = Integer.parseInt(parts[2]);
-
-            if (month < 1 || month > 12) {
-                return false;
-            }
-            if (day < 1 || day > 31) {
-                return false;
-            }
-
-            LocalDate.parse(date);
-            return true;
-        } catch (Exception ex) {
-            return false;
-        }
     }
 
     /**

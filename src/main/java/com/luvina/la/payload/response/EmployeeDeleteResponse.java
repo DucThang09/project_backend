@@ -1,4 +1,4 @@
-package com.luvina.la.payload;
+package com.luvina.la.payload.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;

@@ -8,7 +8,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.luvina.la.payload.EmployeeDeleteResponse;
+import com.luvina.la.payload.response.EmployeeDeleteResponse;
 import com.luvina.la.service.EmployeeService;
 import com.luvina.la.validator.EmployeeSearchValidator;
 import com.luvina.la.validator.EmployeeValidator;

@@ -6,7 +6,7 @@ package com.luvina.la.controller;
  * DepartmentController.java, April 13, 2026 tdthang
  */
 import com.luvina.la.dto.DepartmentDTO;
-import com.luvina.la.payload.DepartmentResponse;
+import com.luvina.la.payload.response.DepartmentResponse;
 import com.luvina.la.service.DepartmentService;
 import java.util.Collections;
 import java.util.List;

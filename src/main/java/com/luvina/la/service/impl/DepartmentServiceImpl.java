@@ -36,15 +36,15 @@ public class DepartmentServiceImpl implements DepartmentService {
         List<Department> departments = departmentRepository.findAllByOrderByDepartmentIdAsc();
 
         // Chuyển entity sang DTO để trả dữ liệu gọn cho controller.
-        List<DepartmentDTO> dtos = new ArrayList<>(departments.size());
+        List<DepartmentDTO> departmentDtos = new ArrayList<>(departments.size());
 
-        for (Department dept : departments) {
-            DepartmentDTO dto = new DepartmentDTO();
-            dto.setDepartmentId(dept.getDepartmentId());
-            dto.setDepartmentName(dept.getDepartmentName());
-            dtos.add(dto);
+        for (Department department : departments) {
+            DepartmentDTO departmentDto = new DepartmentDTO();
+            departmentDto.setDepartmentId(department.getDepartmentId());
+            departmentDto.setDepartmentName(department.getDepartmentName());
+            departmentDtos.add(departmentDto);
         }
 
-        return dtos;
+        return departmentDtos;
     }
 }

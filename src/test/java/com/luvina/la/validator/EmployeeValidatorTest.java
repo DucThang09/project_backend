@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-import com.luvina.la.payload.EmployeeValidationRequest;
-import com.luvina.la.payload.EmployeeValidationResponse.ErrorResponse;
+import com.luvina.la.payload.request.EmployeeValidationRequest;
+import com.luvina.la.payload.response.EmployeeValidationResponse.ErrorResponse;
 import com.luvina.la.repository.CertificationRepository;
 import com.luvina.la.repository.DepartmentRepository;
 import com.luvina.la.repository.EmployeeRepository;

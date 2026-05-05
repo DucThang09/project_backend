@@ -5,7 +5,7 @@ package com.luvina.la.controller;
  * EmployeeController.java, April 13, 2026 tdthang
  */
 import com.luvina.la.dto.CertificationDTO;
-import com.luvina.la.payload.CertificationResponse;
+import com.luvina.la.payload.response.CertificationResponse;
 import com.luvina.la.service.CertificationService;
 import java.util.Collections;
 import java.util.List;

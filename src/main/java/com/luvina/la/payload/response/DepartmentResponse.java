@@ -1,11 +1,11 @@
-package com.luvina.la.payload;
+package com.luvina.la.payload.response;
 /**
  * Copyright(C) 2026 Luvina Software Company
  * <p>
  * EmployeeController.java, April 13, 2026 tdthang
  */
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.luvina.la.dto.CertificationDTO;
+import com.luvina.la.dto.DepartmentDTO;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,19 +14,19 @@ import lombok.Setter;
 import org.springframework.http.HttpStatus;
 
 /**
- * Payload trả về cho API danh sách chứng chỉ.
+ * Payload trả về cho API danh sách phòng ban.
  */
 @Getter
 @Setter
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class CertificationResponse {
+public class DepartmentResponse {
 
     /** Mã trạng thái HTTP. */
     private Integer code;
 
-    /** Danh sách chứng chỉ. */
-    private List<CertificationDTO> certifications;
+    /** Danh sách phòng ban. */
+    private List<DepartmentDTO> departments;
 
     /** Message lỗi hoặc mã message trả về từ backend. */
     private Message message;
@@ -45,15 +45,15 @@ public class CertificationResponse {
     }
 
     /**
-     * Tạo response thành công với danh sách chứng chỉ.
+     * Tạo response thành công với danh sách phòng ban.
      *
-     * @param certifications danh sách chứng chỉ
+     * @param departments danh sách phòng ban
      * @return response với mã 200
      */
-    public static CertificationResponse success(List<CertificationDTO> certifications) {
-        CertificationResponse response = new CertificationResponse();
+    public static DepartmentResponse success(List<DepartmentDTO> departments) {
+        DepartmentResponse response = new DepartmentResponse();
         response.setCode(HttpStatus.OK.value());
-        response.setCertifications(certifications);
+        response.setDepartments(departments);
         return response;
     }
 
@@ -64,8 +64,8 @@ public class CertificationResponse {
      * @param params tham số dùng để format message
      * @return response với mã 500 và message lỗi
      */
-    public static CertificationResponse error(String errorCode, List<String> params) {
-        CertificationResponse response = new CertificationResponse();
+    public static DepartmentResponse error(String errorCode, List<String> params) {
+        DepartmentResponse response = new DepartmentResponse();
         response.setCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
         response.setMessage(new Message(errorCode, params));
         return response;

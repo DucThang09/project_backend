@@ -4,6 +4,8 @@ package com.luvina.la.validator;
  * <p>
  * EmployeeController.java, April 13, 2026 tdthang
  */
+import static com.luvina.la.util.ValidationUtils.isEmpty;
+
 import com.luvina.la.config.Constants;
 import java.util.Collections;
 import java.util.List;
@@ -79,11 +81,6 @@ public class EmployeeSearchValidator {
         } catch (NumberFormatException exception) {
             return null;
         }
-    }
-
-    // Dùng chung để kiểm tra chuỗi null, rỗng hoặc chỉ có khoảng trắng.
-    private boolean isEmpty(String value) {
-        return value == null || value.trim().isEmpty();
     }
 
     // Gói kết quả validate để controller dùng lại thông tin phân trang đã kiểm tra.
