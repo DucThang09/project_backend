@@ -6,9 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import com.luvina.la.payload.request.EmployeeValidationRequest;
 import com.luvina.la.payload.response.EmployeeDeleteResponse;
+import com.luvina.la.payload.response.EmployeeValidationResponse;
 import com.luvina.la.service.EmployeeService;
 import com.luvina.la.validator.EmployeeSearchValidator;
 import com.luvina.la.validator.EmployeeValidator;
@@ -93,5 +96,28 @@ class EmployeeControllerTest {
         assertNotNull(response.getBody().getMessage());
         assertEquals("MSG003", response.getBody().getMessage().getCode());
         assertTrue(response.getBody().getMessage().getParams().isEmpty());
+    }
+
+    @Test
+    void shouldAddEmployeeWithoutSubmitValidation() {
+        EmployeeValidationRequest request = new EmployeeValidationRequest();
+
+        ResponseEntity<EmployeeValidationResponse> response = employeeController.addEmployee(request);
+
+        assertEquals(200, response.getBody().getCode());
+        verify(employeeService).addEmployee(request);
+        verifyNoInteractions(employeeValidator);
+    }
+
+    @Test
+    void shouldUpdateEmployeeWithoutSubmitValidation() {
+        EmployeeValidationRequest request = new EmployeeValidationRequest();
+        request.setEmployeeId("15");
+
+        ResponseEntity<EmployeeValidationResponse> response = employeeController.updateEmployee(request);
+
+        assertEquals(200, response.getBody().getCode());
+        verify(employeeService).updateEmployee(15L, request);
+        verifyNoInteractions(employeeValidator);
     }
 }

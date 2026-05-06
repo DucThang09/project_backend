@@ -60,53 +60,14 @@ class EmployeeValidatorTest {
     }
 
     @Test
-    void shouldReturnEr023WhenAddRequestIsNull() {
-        ErrorResponse result = validator.validateForAdd(null);
+    void shouldReturnEr023WhenConfirmRequestIsNull() {
+        ErrorResponse result = validator.validateForConfirm(null);
 
         assertEquals("ER023", result.getCode());
     }
 
     @Test
-    void shouldReturnEr023WhenEditRequestIsNull() {
-        ErrorResponse result = validator.validateForEdit(null);
-
-        assertEquals("ER023", result.getCode());
-    }
-
-    @Test
-    void shouldReturnEr023WhenEditEmployeeIdIsBlank() {
-        EmployeeValidationRequest request = validRequest();
-        request.setEmployeeId(" ");
-
-        ErrorResponse result = validator.validateForEdit(request);
-
-        assertEquals("ER023", result.getCode());
-    }
-
-    @Test
-    void shouldReturnEr023WhenEditEmployeeIdIsNonNumeric() {
-        EmployeeValidationRequest request = validRequest();
-        request.setEmployeeId("abc");
-
-        ErrorResponse result = validator.validateForEdit(request);
-
-        assertEquals("ER023", result.getCode());
-    }
-
-    @Test
-    void shouldValidateAccountAndPasswordForAddEvenWhenEmployeeIdExists() {
-        EmployeeValidationRequest request = validRequest();
-        request.setEmployeeId("1");
-        request.setEmployeeLoginId(" ");
-        request.setEmployeeLoginPassword("");
-
-        ErrorResponse result = validator.validateForAdd(request);
-
-        assertEquals("ER019", result.getCode());
-    }
-
-    @Test
-    void shouldSkipAccountAndPasswordForValidEdit() {
+    void shouldSkipAccountAndPasswordForConfirmEdit() {
         EmployeeValidationRequest request = validRequest();
         request.setEmployeeId("1");
         request.setEmployeeLoginId(" ");
@@ -114,10 +75,21 @@ class EmployeeValidatorTest {
         when(departmentRepository.existsById(1L)).thenReturn(true);
         when(certificationRepository.existsById(1L)).thenReturn(true);
 
-        ErrorResponse result = validator.validateForEdit(request);
+        ErrorResponse result = validator.validateForConfirm(request);
 
         assertTrue(result.isValid());
         assertEquals("200", result.getCode());
+    }
+
+    @Test
+    void shouldValidateAccountAndPasswordForConfirmAdd() {
+        EmployeeValidationRequest request = validRequest();
+        request.setEmployeeLoginId(" ");
+        request.setEmployeeLoginPassword("");
+
+        ErrorResponse result = validator.validateForConfirm(request);
+
+        assertEquals("ER019", result.getCode());
     }
 
     @Test

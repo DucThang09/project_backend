@@ -84,27 +84,6 @@ public class EmployeeValidator {
         return validateEmployeeInput(request, isEditMode);
     }
 
-    public ErrorResponse validateForAdd(EmployeeValidationRequest request) {
-        if (request == null) {
-            return buildResponse("ER023");
-        }
-
-        return validateEmployeeInput(request, false);
-    }
-
-    public ErrorResponse validateForEdit(EmployeeValidationRequest request) {
-        if (request == null) {
-            return buildResponse("ER023");
-        }
-
-        ErrorResponse employeeIdError = validateEmployeeIdForEdit(request.getEmployeeId());
-        if (employeeIdError != null) {
-            return employeeIdError;
-        }
-
-        return validateEmployeeInput(request, true);
-    }
-
     private ErrorResponse validateEmployeeInput(EmployeeValidationRequest request, boolean isEditMode) {
         ErrorResponse errorResponse;
         // Mode edit không cho sửa account và password nên bỏ qua validate các field đó.
@@ -164,25 +143,6 @@ public class EmployeeValidator {
 
         // Không có lỗi nào thì trả kết quả validate thành công.
         return ErrorResponse.valid();
-    }
-
-    public ErrorResponse validateEmployeeIdForEdit(String employeeId) {
-        if (employeeId == null) {
-            return buildResponse("ER023");
-        }
-
-        if (employeeId.isEmpty()
-                || !POSITIVE_INTEGER_PATTERN.matcher(employeeId).matches()) {
-            return buildResponse("ER023");
-        }
-
-        try {
-            Long.parseLong(employeeId);
-        } catch (NumberFormatException exception) {
-            return buildResponse("ER023");
-        }
-
-        return null;
     }
 
     /**

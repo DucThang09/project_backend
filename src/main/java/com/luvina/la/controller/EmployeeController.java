@@ -40,13 +40,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/employee")
 public class EmployeeController {
 
-    /** Service xử lý truy vấn dữ liệu nhân viên. */
     private final EmployeeService employeeService;
-
-    /** Validator kiểm tra tham số tìm kiếm danh sách nhân viên. */
     private final EmployeeSearchValidator employeeSearchValidator;
-
-    /** Validator kiểm tra dữ liệu thêm mới và cập nhật nhân viên. */
     private final EmployeeValidator employeeValidator;
 
     /**
@@ -205,19 +200,6 @@ public class EmployeeController {
             @RequestBody(required = false) EmployeeValidationRequest request
     ) {
         try {
-            // Validate lại dữ liệu trước khi thêm mới để tránh dữ liệu không hợp lệ được lưu.
-            ErrorResponse validationError = employeeValidator.validateForAdd(request);
-
-            // Nếu có lỗi validate thì trả lỗi cho frontend.
-            if (!validationError.isValid()) {
-                return ResponseEntity.ok(
-                        EmployeeValidationResponse.error(
-                                validationError.getCode(),
-                                validationError.getParams()
-                        )
-                );
-            }
-
             // Thêm mới nhân viên và thông tin chứng chỉ nếu có.
             employeeService.addEmployee(request);
 
@@ -240,19 +222,6 @@ public class EmployeeController {
             @RequestBody(required = false) EmployeeValidationRequest request
     ) {
         try {
-            // Validate lại dữ liệu trước khi cập nhật.
-            ErrorResponse validationError = employeeValidator.validateForEdit(request);
-
-            // Nếu có lỗi validate thì trả lỗi cho frontend.
-            if (!validationError.isValid()) {
-                return ResponseEntity.ok(
-                        EmployeeValidationResponse.error(
-                                validationError.getCode(),
-                                validationError.getParams()
-                        )
-                );
-            }
-
             // Cập nhật nhân viên và ghi lại thông tin chứng chỉ nếu có.
             Long employeeId = Long.parseLong(request.getEmployeeId());
             employeeService.updateEmployee(employeeId, request);
