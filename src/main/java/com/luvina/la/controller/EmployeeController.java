@@ -200,6 +200,15 @@ public class EmployeeController {
             @RequestBody(required = false) EmployeeValidationRequest request
     ) {
         try {
+            ErrorResponse validationError = employeeValidator.validateForConfirm(request);
+            if (!validationError.isValid()) {
+                return ResponseEntity.ok(
+                        EmployeeValidationResponse.error(
+                                validationError.getCode(),
+                                validationError.getParams()
+                        )
+                );
+            }
             // Thêm mới nhân viên và thông tin chứng chỉ nếu có.
             employeeService.addEmployee(request);
 

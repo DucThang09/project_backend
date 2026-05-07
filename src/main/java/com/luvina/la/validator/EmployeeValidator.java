@@ -79,7 +79,6 @@ public class EmployeeValidator {
         if (request == null) {
             return buildResponse("ER023");
         }
-
         boolean isEditMode = request.getEmployeeId() != null && !request.getEmployeeId().isBlank();
         return validateEmployeeInput(request, isEditMode);
     }
