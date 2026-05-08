@@ -199,6 +199,7 @@ public class EmployeeController {
     public ResponseEntity<EmployeeValidationResponse> addEmployee(
             @RequestBody(required = false) EmployeeValidationRequest request
     ) {
+        // Validate dữ liệu nhập từ màn ADM004 trước khi thêm mới nhân viên và chuyển sang màn ADM005.
         try {
             ErrorResponse validationError = employeeValidator.validateForConfirm(request);
             if (!validationError.isValid()) {

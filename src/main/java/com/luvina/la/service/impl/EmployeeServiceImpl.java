@@ -128,7 +128,7 @@ public class EmployeeServiceImpl implements EmployeeService {
      * @return thông tin chi tiết nếu tồn tại và không phải admin
      */
     @Override
-    @Transactional
+
     public Optional<EmployeeDetailDTO> getEmployeeDetail(Long employeeId) {
         // Tìm nhân viên theo ID. Không có dữ liệu thì trả Optional rỗng để controller trả lỗi.
         Optional<Employee> employeeOptional = employeeRepository.findById(employeeId);
