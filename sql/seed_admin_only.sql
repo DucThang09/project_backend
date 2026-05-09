@@ -1,7 +1,7 @@
 -- Run this after the application starts in dev mode with Hibernate create-drop.
 -- It keeps only master data and a single admin account.
 
-DELETE FROM employee_certifications;
+DELETE FROM employees_certifications;
 DELETE FROM employees;
 DELETE FROM certifications;
 DELETE FROM departments;

@@ -101,12 +101,18 @@ class EmployeeControllerTest {
     @Test
     void shouldAddEmployeeWithoutSubmitValidation() {
         EmployeeValidationRequest request = new EmployeeValidationRequest();
+        when(employeeValidator.validateForConfirm(request)).thenReturn(
+                EmployeeValidationResponse.ErrorResponse.valid()
+        );
+        when(employeeService.addEmployee(request)).thenReturn(30L);
 
         ResponseEntity<EmployeeValidationResponse> response = employeeController.addEmployee(request);
 
+        assertEquals(200, response.getStatusCodeValue());
         assertEquals(200, response.getBody().getCode());
+        assertEquals(30L, response.getBody().getEmployeeId());
+        assertEquals("MSG001", response.getBody().getMessage().getCode());
         verify(employeeService).addEmployee(request);
-        verifyNoInteractions(employeeValidator);
     }
 
     @Test

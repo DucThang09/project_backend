@@ -24,6 +24,8 @@ public class EmployeeValidationResponse {
     /** Mã trạng thái HTTP. */
     private Integer code;
 
+    private Long employeeId;
+
     /** Message lỗi trả về khi request không hợp lệ. */
     private Message message;
 
@@ -75,6 +77,13 @@ public class EmployeeValidationResponse {
     public static EmployeeValidationResponse success() {
         EmployeeValidationResponse response = new EmployeeValidationResponse();
         response.setCode(HttpStatus.OK.value());
+        return response;
+    }
+
+    public static EmployeeValidationResponse success(Long employeeId, String messageCode) {
+        EmployeeValidationResponse response = success();
+        response.setEmployeeId(employeeId);
+        response.setMessage(new Message(messageCode, List.of()));
         return response;
     }
 

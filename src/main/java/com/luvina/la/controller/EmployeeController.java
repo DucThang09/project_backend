@@ -21,6 +21,7 @@ import com.luvina.la.validator.EmployeeValidator;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -203,7 +204,7 @@ public class EmployeeController {
         try {
             ErrorResponse validationError = employeeValidator.validateForConfirm(request);
             if (!validationError.isValid()) {
-                return ResponseEntity.ok(
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                         EmployeeValidationResponse.error(
                                 validationError.getCode(),
                                 validationError.getParams()
@@ -211,13 +212,15 @@ public class EmployeeController {
                 );
             }
             // Thêm mới nhân viên và thông tin chứng chỉ nếu có.
-            employeeService.addEmployee(request);
+            Long employeeId = employeeService.addEmployee(request);
 
             // Trả response thành công cho màn ADM005 để chuyển sang ADM006.
-            return ResponseEntity.ok(EmployeeValidationResponse.success());
+            return ResponseEntity.ok(EmployeeValidationResponse.success(employeeId, "MSG001"));
         } catch (Exception exception) {
-            // Nếu có lỗi ngoài dự kiến thì trả lỗi hệ thống ER023.
-            return ResponseEntity.ok(EmployeeValidationResponse.error("ER023", Collections.emptyList()));
+            // Nếu có lỗi ngoài dự kiến thì trả lỗi hệ thống ER015.
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    EmployeeValidationResponse.error("ER015", Collections.emptyList())
+            );
         }
     }
 

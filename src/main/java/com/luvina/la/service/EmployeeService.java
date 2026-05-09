@@ -55,7 +55,7 @@ public interface EmployeeService {
      *
      * @param employeeValidationRequest du lieu nhan vien da duoc validate
      */
-    void addEmployee(EmployeeValidationRequest employeeValidationRequest);
+    Long addEmployee(EmployeeValidationRequest employeeValidationRequest);
 
     /**
      * Cap nhat nhan vien theo ID va ghi de lai thong tin chung chi hien tai.

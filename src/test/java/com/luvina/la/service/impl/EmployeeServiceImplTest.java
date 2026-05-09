@@ -129,6 +129,46 @@ class EmployeeServiceImplTest {
     }
 
     @Test
+    void shouldEscapeEmployeeNameWildcardsWhenCountingEmployees() {
+        employeeService.getTotalEmployees(1L, " A%_\\ ");
+
+        verify(employeeRepository).countTotalEmployees(1L, "A\\%\\_\\\\");
+    }
+
+    @Test
+    void shouldEscapeEmployeeNameWildcardsWhenFindingEmployees() {
+        when(employeeRepository.findEmployees(
+                null,
+                "A\\%\\_\\\\",
+                "ASC",
+                "ASC",
+                "DESC",
+                Constants.DEFAULT_LIMIT,
+                Constants.DEFAULT_OFFSET
+        )).thenReturn(List.of());
+
+        employeeService.getEmployees(
+                null,
+                " A%_\\ ",
+                "ASC",
+                "ASC",
+                "DESC",
+                null,
+                null
+        );
+
+        verify(employeeRepository).findEmployees(
+                null,
+                "A\\%\\_\\\\",
+                "ASC",
+                "ASC",
+                "DESC",
+                Constants.DEFAULT_LIMIT,
+                Constants.DEFAULT_OFFSET
+        );
+    }
+
+    @Test
     void shouldReturnEmployeeDetailWhenEmployeeExists() {
         Department department = new Department();
         department.setDepartmentId(2L);
@@ -158,7 +198,23 @@ class EmployeeServiceImplTest {
         employee.setRole("USER");
         employee.setEmployeeCertifications(List.of(employeeCertification));
 
-        when(employeeRepository.findById(30L)).thenReturn(Optional.of(employee));
+        Object[] row = new Object[] {
+                30L,
+                "user01",
+                2L,
+                "Development",
+                "Test User",
+                employee.getEmployeeNameKana(),
+                Date.valueOf(LocalDate.of(2000, 1, 1)),
+                "test@example.com",
+                "0123456789",
+                1L,
+                "N1",
+                Date.valueOf(LocalDate.of(2020, 1, 1)),
+                Date.valueOf(LocalDate.of(2022, 1, 1)),
+                new BigDecimal("850")
+        };
+        when(employeeRepository.findEmployeeDetail(30L)).thenReturn(List.of(row));
 
         Optional<EmployeeDetailDTO> result = employeeService.getEmployeeDetail(30L);
 
@@ -170,7 +226,7 @@ class EmployeeServiceImplTest {
 
     @Test
     void shouldReturnEmptyWhenEmployeeDoesNotExist() {
-        when(employeeRepository.findById(7L)).thenReturn(Optional.empty());
+        when(employeeRepository.findEmployeeDetail(7L)).thenReturn(List.of());
 
         Optional<EmployeeDetailDTO> result = employeeService.getEmployeeDetail(7L);
 
@@ -188,7 +244,7 @@ class EmployeeServiceImplTest {
         employee.setDepartment(department);
         employee.setRole("ADMIN");
 
-        when(employeeRepository.findById(1L)).thenReturn(Optional.of(employee));
+        when(employeeRepository.findEmployeeDetail(1L)).thenReturn(List.of());
 
         Optional<EmployeeDetailDTO> result = employeeService.getEmployeeDetail(1L);
 
@@ -213,7 +269,23 @@ class EmployeeServiceImplTest {
         employee.setRole("USER");
         employee.setEmployeeCertifications(Collections.emptyList());
 
-        when(employeeRepository.findById(7L)).thenReturn(Optional.of(employee));
+        Object[] row = new Object[] {
+                7L,
+                "user06",
+                2L,
+                "Development",
+                "Bui Thu Ha",
+                employee.getEmployeeNameKana(),
+                Date.valueOf(LocalDate.of(1994, 6, 30)),
+                "ha06@example.com",
+                "0901000006",
+                null,
+                null,
+                null,
+                null,
+                null
+        };
+        when(employeeRepository.findEmployeeDetail(7L)).thenReturn(List.of(row));
 
         Optional<EmployeeDetailDTO> result = employeeService.getEmployeeDetail(7L);
 
@@ -237,8 +309,9 @@ class EmployeeServiceImplTest {
         when(passwordEncoder.encode("secret123")).thenReturn("encoded-password");
         when(employeeRepository.save(any(Employee.class))).thenReturn(savedEmployee);
 
-        employeeService.addEmployee(request);
+        Long employeeId = employeeService.addEmployee(request);
 
+        assertEquals(30L, employeeId);
         verify(employeeRepository).save(any(Employee.class));
         verify(employeeCertificationRepository).save(any());
     }

@@ -1,7 +1,7 @@
 -- Run this after the application starts in dev mode with Hibernate create-drop.
 -- It seeds base master data plus 21 visible employees for list/search/sort testing.
 
-DELETE FROM employee_certifications;
+DELETE FROM employees_certifications;
 DELETE FROM employees;
 DELETE FROM certifications;
 DELETE FROM departments;
@@ -56,7 +56,7 @@ VALUES
     (21, 2, 'Luong Duc Xuan', 'Luong Duc Xuan', '1988-08-16', 'xuan20@example.com', '0901000020', 'user20', '$2a$10$r.XIN4K9vTioiuYQwaTop.UVQ5r5FvrKk2V5Orm9Hc6n4i9Tvjthy'),
     (22, 3, 'Nguyen Bao Thu', 'Nguyen Bao Thu', '1992-09-09', 'thu21@example.com', '0901000021', 'user21', '$2a$10$r.XIN4K9vTioiuYQwaTop.UVQ5r5FvrKk2V5Orm9Hc6n4i9Tvjthy');
 
-INSERT INTO employee_certifications (
+INSERT INTO employees_certifications (
     employee_certification_id,
     employee_id,
     certification_id,

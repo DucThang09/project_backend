@@ -24,6 +24,22 @@ public final class ValidationUtils {
         return value == null || value.trim().isEmpty();
     }
 
+    public static String escapeLikePattern(String value) {
+        if (value == null) {
+            return null;
+        }
+
+        String trimmedValue = value.trim();
+        if (trimmedValue.isEmpty()) {
+            return "";
+        }
+
+        return trimmedValue
+                .replace("\\", "\\\\")
+                .replace("%", "\\%")
+                .replace("_", "\\_");
+    }
+
     /**
      * Kiểm tra độ dài tối đa của chuỗi.
      *

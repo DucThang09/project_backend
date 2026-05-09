@@ -18,12 +18,12 @@ import javax.persistence.Table;
 import lombok.Data;
 
 /**
- * Entity đại diện cho bảng employee_certifications.
+ * Entity đại diện cho bảng employees_certifications.
  * Liên kết nhân viên với chứng chỉ của họ, bao gồm ngày bắt đầu,
  * ngày kết thúc và điểm số đạt được.
  */
 @Entity
-@Table(name = "employee_certifications")
+@Table(name = "employees_certifications")
 @Data
 public class EmployeeCertification implements Serializable {
 

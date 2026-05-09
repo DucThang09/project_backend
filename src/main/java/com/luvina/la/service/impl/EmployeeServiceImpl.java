@@ -1,6 +1,7 @@
 package com.luvina.la.service.impl;
 
 import com.luvina.la.config.Constants;
+import static com.luvina.la.util.ValidationUtils.escapeLikePattern;
 import com.luvina.la.dto.EmployeeDTO;
 import com.luvina.la.dto.EmployeeDetailDTO;
 import com.luvina.la.entity.Certification;
@@ -73,7 +74,7 @@ public class EmployeeServiceImpl implements EmployeeService {
      */
     @Override
     public Long getTotalEmployees(Long departmentId, String employeeName) {
-        return employeeRepository.countTotalEmployees(departmentId, employeeName);
+        return employeeRepository.countTotalEmployees(departmentId, escapeLikePattern(employeeName));
     }
 
     /**
@@ -105,7 +106,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         // Query dữ liệu dạng Object[] từ repository theo điều kiện đã validate ở controller.
         List<Object[]> results = employeeRepository.findEmployees(
                 departmentId,
-                employeeName,
+                escapeLikePattern(employeeName),
                 ordEmployeeName,
                 ordCertificationName,
                 ordEndDate,
@@ -131,21 +132,13 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     public Optional<EmployeeDetailDTO> getEmployeeDetail(Long employeeId) {
         // Tìm nhân viên theo ID. Không có dữ liệu thì trả Optional rỗng để controller trả lỗi.
-        Optional<Employee> employeeOptional = employeeRepository.findById(employeeId);
-        if (employeeOptional.isEmpty()) {
+        List<Object[]> rows = employeeRepository.findEmployeeDetail(employeeId);
+        if (rows.isEmpty()) {
             return Optional.empty();
         }
 
-        Employee employee = employeeOptional.get();
-
-        // Không cho phép hiển thị/sửa tài khoản admin ở luồng quản lý nhân viên thường.
-        String role = employee.getRole() == null ? "USER" : employee.getRole().trim().toUpperCase();
-        if ("ADMIN".equals(role)) {
-            return Optional.empty();
-        }
-
-        // Convert entity sang DTO chi tiết để trả về ADM003/ADM004.
-        return Optional.of(toEmployeeDetailDTO(employee));
+        // Convert query row sang DTO chi tiết để trả về ADM003/ADM004.
+        return Optional.of(EmployeeDetailDTO.fromRow(rows.get(0)));
     }
 
     /**
@@ -155,7 +148,7 @@ public class EmployeeServiceImpl implements EmployeeService {
      */
     @Override
     @Transactional
-    public void addEmployee(EmployeeValidationRequest employeeValidationRequest) {
+    public Long addEmployee(EmployeeValidationRequest employeeValidationRequest) {
         // Tạo entity mới và map dữ liệu từ request sang entity.
         Employee employee = new Employee();
         applyEmployeeValues(employee, employeeValidationRequest, true);
@@ -166,6 +159,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         // Lưu employee trước để có employeeId dùng cho bảng liên kết chứng chỉ.
         Employee savedEmployee = employeeRepository.save(employee);
         updateEmployeeCertification(savedEmployee, employeeValidationRequest);
+        return savedEmployee.getEmployeeId();
     }
 
     /**

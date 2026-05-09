@@ -5,7 +5,7 @@
 
 SET FOREIGN_KEY_CHECKS = 0;
 
-DROP TABLE IF EXISTS employee_certifications;
+DROP TABLE IF EXISTS employees_certifications;
 DROP TABLE IF EXISTS employees;
 DROP TABLE IF EXISTS certifications;
 DROP TABLE IF EXISTS departments;
@@ -44,8 +44,8 @@ CREATE TABLE employees (
         FOREIGN KEY (department_id) REFERENCES departments (department_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Create employee_certifications table
-CREATE TABLE employee_certifications (
+-- Create employees_certifications table
+CREATE TABLE employees_certifications (
     employee_certification_id BIGINT NOT NULL AUTO_INCREMENT,
     employee_id BIGINT NOT NULL,
     certification_id BIGINT NOT NULL,
@@ -53,9 +53,9 @@ CREATE TABLE employee_certifications (
     end_date DATE NOT NULL,
     score DECIMAL(5,2) NOT NULL,
     PRIMARY KEY (employee_certification_id) USING BTREE,
-    CONSTRAINT fk_employee_certifications_employee
+    CONSTRAINT fk_employees_certifications_employee
         FOREIGN KEY (employee_id) REFERENCES employees (employee_id),
-    CONSTRAINT fk_employee_certifications_certification
+    CONSTRAINT fk_employees_certifications_certification
         FOREIGN KEY (certification_id) REFERENCES certifications (certification_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -117,7 +117,7 @@ VALUES
     (25, 3, 'Nguyen Trung Kien', 'Nguyen Trung Kien', '1990-05-20', 'kien35@example.com', '0901000035', 'user35', '$2a$10$r.XIN4K9vTioiuYQwaTop.UVQ5r5FvrKk2V5Orm9Hc6n4i9Tvjthy', 'USER'),
     (26, 4, 'Nguyen Trung Kien', 'Nguyen Trung Kien', '1994-06-25', 'kien36@example.com', '0901000036', 'user36', '$2a$10$r.XIN4K9vTioiuYQwaTop.UVQ5r5FvrKk2V5Orm9Hc6n4i9Tvjthy', 'USER');
 
-INSERT INTO employee_certifications (
+INSERT INTO employees_certifications (
     employee_certification_id,
     employee_id,
     certification_id,
@@ -155,4 +155,4 @@ VALUES
 ALTER TABLE departments AUTO_INCREMENT = 5;
 ALTER TABLE certifications AUTO_INCREMENT = 6;
 ALTER TABLE employees AUTO_INCREMENT = 27;
-ALTER TABLE employee_certifications AUTO_INCREMENT = 26;
+ALTER TABLE employees_certifications AUTO_INCREMENT = 26;
