@@ -1,9 +1,9 @@
-package com.luvina.la.controller;
 /**
  * Copyright(C) 2026 Luvina Software Company
- * <p>
- * AuthController.java, April 13, 2026 tdthang
+ *
+ * AuthController.java, 10/05/2026 tdthang
  */
+package com.luvina.la.controller;
 
 import com.luvina.la.config.jwt.AuthUserDetails;
 import com.luvina.la.config.jwt.JwtTokenProvider;
@@ -21,6 +21,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,20 +32,17 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Controller xử lý các API xác thực người dùng.
  * Bao gồm đăng nhập và kiểm tra token JWT.
+ * @author tdthang
  */
 @RestController
 public class AuthController {
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
-    /** Component tạo và kiểm tra JWT. */
     final JwtTokenProvider tokenProvider;
-
     /** Component xác thực thông tin đăng nhập của người dùng. */
     final AuthenticationManager authenticationManager;
-
     /** Service load thông tin người dùng phục vụ xác thực. */
     final UserDetailsServiceImpl userDetailsService;
-
     /**
      * Constructor để inject các dependency phục vụ xác thực và tạo JWT.
      *
@@ -76,16 +74,17 @@ public class AuthController {
                     )
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            if (!isAdmin(authentication)) {
+                SecurityContextHolder.clearContext();
+                errors.put("code", "100");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse(errors));
+            }
             String accessToken = tokenProvider.generateToken((AuthUserDetails) authentication.getPrincipal());
             return ResponseEntity.ok(new LoginResponse(accessToken));
         } catch (UsernameNotFoundException | BadCredentialsException ex) {
             log.warn(ex.getMessage());
             errors.put("code", "100");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse(errors));
-        } catch (Exception ex) {
-            log.warn(ex.getMessage());
-            errors.put("code", "000");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new LoginResponse(errors));
         }
     }
 
@@ -99,5 +98,11 @@ public class AuthController {
         Map<String, String> testData = new HashMap<>();
         testData.put("msg", "Token is valid");
         return testData;
+    }
+
+    private boolean isAdmin(Authentication authentication) {
+        return authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch("ROLE_ADMIN"::equals);
     }
 }

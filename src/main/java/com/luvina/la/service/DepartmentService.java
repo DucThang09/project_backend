@@ -1,14 +1,16 @@
-package com.luvina.la.service;
 /**
  * Copyright(C) 2026 Luvina Software Company
- * <p>
- * EmployeeController.java, April 13, 2026 tdthang
+ *
+ * DepartmentService.java, 10/05/2026 tdthang
  */
+package com.luvina.la.service;
+
 import com.luvina.la.dto.DepartmentDTO;
 import java.util.List;
 
 /**
  * Service xử lý nghiệp vụ phòng ban.
+ * @author tdthang
  */
 public interface DepartmentService {
 

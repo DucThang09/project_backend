@@ -1,9 +1,10 @@
-package com.luvina.la.entity;
 /**
  * Copyright(C) 2026 Luvina Software Company
- * <p>
- * EmployeeController.java, April 13, 2026 tdthang
+ *
+ * EmployeeCertification.java, 10/05/2026 tdthang
  */
+package com.luvina.la.entity;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -21,40 +22,28 @@ import lombok.Data;
  * Entity đại diện cho bảng employees_certifications.
  * Liên kết nhân viên với chứng chỉ của họ, bao gồm ngày bắt đầu,
  * ngày kết thúc và điểm số đạt được.
+ * @author tdthang
  */
 @Entity
 @Table(name = "employees_certifications")
 @Data
 public class EmployeeCertification implements Serializable {
 
-    /** Serial version UID cho việc tuần tự hóa. */
     private static final long serialVersionUID = 1L;
-
-    /** ID duy nhất của mối quan hệ nhân viên-chứng chỉ, tự động tăng. */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "employee_certification_id")
     private Long employeeCertificationId;
-
-    /** Nhân viên sở hữu chứng chỉ này. */
     @ManyToOne
     @JoinColumn(name = "employee_id")
     private Employee employee;
-
-    /** Chứng chỉ mà nhân viên sở hữu. */
     @ManyToOne
     @JoinColumn(name = "certification_id")
     private Certification certification;
-
-    /** Ngày bắt đầu hiệu lực của chứng chỉ. */
     @Column(name = "start_date")
     private LocalDate startDate;
-
-    /** Ngày kết thúc hiệu lực của chứng chỉ. */
     @Column(name = "end_date")
     private LocalDate endDate;
-
-    /** Điểm số đạt được trong kỳ thi chứng chỉ. */
     @Column(name = "score")
     private BigDecimal score;
 }

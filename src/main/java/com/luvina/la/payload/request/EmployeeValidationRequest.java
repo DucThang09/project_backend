@@ -1,13 +1,15 @@
-package com.luvina.la.payload.request;
 /**
  * Copyright(C) 2026 Luvina Software Company
- * <p>
- * EmployeeController.java, April 13, 2026 tdthang
+ *
+ * EmployeeValidationRequest.java, 10/05/2026 tdthang
  */
+package com.luvina.la.payload.request;
+
 import lombok.Data;
 
 /**
  * Payload dùng chung cho validate, thêm mới và cập nhật nhân viên.
+ * @author tdthang
  */
 @Data
 public class EmployeeValidationRequest {

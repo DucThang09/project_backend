@@ -1,9 +1,10 @@
-package com.luvina.la.repository;
 /**
  * Copyright(C) 2026 Luvina Software Company
- * <p>
- * EmployeeController.java, April 13, 2026 tdthang
+ *
+ * CertificationRepository.java, 10/05/2026 tdthang
  */
+package com.luvina.la.repository;
+
 import com.luvina.la.entity.Certification;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 /**
  * Repository để truy cập dữ liệu chứng chỉ.
+ * @author tdthang
  */
 @Repository
 public interface CertificationRepository extends JpaRepository<Certification, Long> {

@@ -40,10 +40,10 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
             FROM employees e
             INNER JOIN departments d ON e.department_id = d.department_id
             WHERE 1 = 1
-              AND COALESCE(UPPER(TRIM(e.employee_role)), 'USER') <> 'ADMIN'
+              AND e.employee_role <> 1
               AND (:departmentId IS NULL OR e.department_id = :departmentId)
               AND (:employeeName IS NULL OR :employeeName = ''
-                   OR e.employee_name LIKE CONCAT('%', :employeeName, '%') ESCAPE '\\')
+                   OR e.employee_name LIKE CONCAT('%', :employeeName, '%') ESCAPE '\\\\')
             """, nativeQuery = true)
     Long countTotalEmployees(@Param("departmentId") Long departmentId,
                              @Param("employeeName") String employeeName);
@@ -67,34 +67,18 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
                c.certification_name, ec.end_date, ec.score
            FROM employees e
            INNER JOIN departments d ON e.department_id = d.department_id
-           LEFT JOIN (
-               SELECT ec1.employee_id, ec1.certification_id, ec1.end_date,
-                      ec1.score, ec1.employee_certification_id
-               FROM employees_certifications ec1
-               INNER JOIN certifications c1 ON ec1.certification_id = c1.certification_id
-               WHERE NOT EXISTS (
-                   SELECT 1
-                   FROM employees_certifications ec2
-                   INNER JOIN certifications c2 ON ec2.certification_id = c2.certification_id
-                   WHERE ec2.employee_id = ec1.employee_id
-                     AND (c2.certification_level > c1.certification_level
-                          OR (c2.certification_level = c1.certification_level AND ec2.end_date > ec1.end_date)
-                          OR (c2.certification_level = c1.certification_level
-                              AND ec2.end_date = ec1.end_date
-                              AND ec2.employee_certification_id > ec1.employee_certification_id))
-               )
-           ) ec ON e.employee_id = ec.employee_id
+           LEFT JOIN employees_certifications ec ON e.employee_id = ec.employee_id
            LEFT JOIN certifications c ON ec.certification_id = c.certification_id
            WHERE 1 = 1
-             AND COALESCE(UPPER(TRIM(e.employee_role)), 'USER') <> 'ADMIN'
+             AND e.employee_role <> 1
              AND (:departmentId IS NULL OR e.department_id = :departmentId)
               AND (:employeeName IS NULL OR :employeeName = ''
-                   OR e.employee_name LIKE CONCAT('%', :employeeName, '%') ESCAPE '\\')
+                   OR e.employee_name LIKE CONCAT('%', :employeeName, '%') ESCAPE '\\\\')
            ORDER BY
              CASE WHEN :ordEmployeeName = 'ASC'  THEN e.employee_name END ASC,
              CASE WHEN :ordEmployeeName = 'DESC' THEN e.employee_name END DESC,
-             CASE WHEN :ordCertificationName = 'ASC'  THEN c.certification_name END ASC,
-             CASE WHEN :ordCertificationName = 'DESC' THEN c.certification_name END DESC,
+             CASE WHEN :ordCertificationName = 'ASC'  THEN c.certification_level END ASC,
+             CASE WHEN :ordCertificationName = 'DESC' THEN c.certification_level END DESC,
              CASE WHEN :ordEndDate = 'ASC'  THEN ec.end_date END ASC,
              CASE WHEN :ordEndDate = 'DESC' THEN ec.end_date END DESC,
              e.employee_id ASC
@@ -111,10 +95,10 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     );
 
     /**
-     * Lay thong tin chi tiet cua mot nhan vien.
+     * Lấy thông tin chi tiết của một nhân viên.
      *
-     * @param employeeId ID nhan vien can lay chi tiet
-     * @return du lieu tho tu truy van native
+     * @param employeeId ID nhân viên cần lấy chi tiết
+     * @return dữ liệu thô từ truy vấn native
      */
     @Query(value = """
             SELECT
@@ -137,7 +121,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
             LEFT JOIN employees_certifications ec ON e.employee_id = ec.employee_id
             LEFT JOIN certifications c ON ec.certification_id = c.certification_id
             WHERE e.employee_id = :employeeId
-              AND COALESCE(UPPER(TRIM(e.employee_role)), 'USER') <> 'ADMIN'
+              AND e.employee_role <> 1
             """, nativeQuery = true)
     List<Object[]> findEmployeeDetail(@Param("employeeId") Long employeeId);
 }

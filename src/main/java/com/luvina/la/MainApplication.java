@@ -1,12 +1,10 @@
-package com.luvina.la;
 /**
- * Lớp chính khởi động ứng dụng Spring Boot.
- * Cấu hình và chạy ứng dụng Employee Management System.
+ * Copyright(C) 2026 Luvina Software Company
  *
- * @author tdthang
- * @version 1.0
- * @since April 13, 2026
+ * MainApplication.java, 10/05/2026 tdthang
  */
+package com.luvina.la;
+
 import com.luvina.la.config.Constants;
 import com.luvina.la.config.DefaultProfileUtil;
 import java.net.InetAddress;
@@ -24,16 +22,14 @@ import org.springframework.util.StringUtils;
 /**
  * Lớp chính của ứng dụng Spring Boot.
  * Khởi động ứng dụng và kiểm tra cấu hình profile.
+ * @author tdthang
  */
 @SpringBootApplication
 public class MainApplication implements InitializingBean {
 
-    /** Logger để ghi log thông tin khởi động ứng dụng. */
     private static final Logger log = LoggerFactory.getLogger(MainApplication.class);
-
     /** Environment chứa các cấu hình của ứng dụng. */
     private final Environment env;
-
     /**
      * Constructor để inject Environment.
      *

@@ -1,3 +1,8 @@
+/**
+ * Copyright(C) 2026 Luvina Software Company
+ *
+ * ValidationUtils.java, 10/05/2026 tdthang
+ */
 package com.luvina.la.util;
 
 import static com.luvina.la.config.Constants.ACCOUNT_NAME_PATTERN;
@@ -5,7 +10,14 @@ import static com.luvina.la.config.Constants.EMAIL_PATTERN;
 import static com.luvina.la.config.Constants.KATAKANA_PATTERN;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.regex.Pattern;
+
+/**
+ * Mô tả chức năng của ValidationUtils.
+ *
+ * @author tdthang
+ */
 
 public final class ValidationUtils {
 
@@ -23,6 +35,12 @@ public final class ValidationUtils {
     public static boolean isEmpty(String value) {
         return value == null || value.trim().isEmpty();
     }
+    /**
+     * Xử lý chức năng escapeLikePattern.
+     *
+     * @param value tham số đầu vào của method
+     * @return giá trị trả về sau khi xử lý
+     */
 
     public static String escapeLikePattern(String value) {
         if (value == null) {
@@ -150,7 +168,7 @@ public final class ValidationUtils {
 
             LocalDate.parse(date);
             return true;
-        } catch (Exception exception) {
+        } catch (NumberFormatException | DateTimeParseException exception) {
             return false;
         }
     }

@@ -1,9 +1,10 @@
-package com.luvina.la.validator;
 /**
  * Copyright(C) 2026 Luvina Software Company
- * <p>
- * EmployeeController.java, April 13, 2026 tdthang
+ *
+ * EmployeeValidator.java, 10/05/2026 tdthang
  */
+package com.luvina.la.validator;
+
 import static com.luvina.la.config.Constants.ACCOUNT_NAME;
 import static com.luvina.la.config.Constants.BIRTH_DATE;
 import static com.luvina.la.config.Constants.CERTIFICATION;
@@ -40,6 +41,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Lớp EmployeeValidator chứa các logic kiểm tra dữ liệu đầu vào.
+ * @author tdthang
  */
 @Component
 public class EmployeeValidator {
@@ -72,16 +74,31 @@ public class EmployeeValidator {
      * @return ErrorResponse chứa mã lỗi nếu có lỗi, hoặc success nếu hợp lệ
      */
     public ErrorResponse validate(EmployeeValidationRequest request) {
+
         return validateForConfirm(request);
     }
+    /**
+     * Kiểm tra dữ liệu validateForConfirm.
+     *
+     * @param request tham số đầu vào của method
+     * @return giá trị trả về sau khi xử lý
+     */
 
     public ErrorResponse validateForConfirm(EmployeeValidationRequest request) {
         if (request == null) {
             return buildResponse("ER023");
         }
-        boolean isEditMode = request.getEmployeeId() != null && !request.getEmployeeId().isBlank();
+        String employeeId = request.getEmployeeId();
+        boolean isEditMode = employeeId != null && !employeeId.isBlank();
         return validateEmployeeInput(request, isEditMode);
     }
+    /**
+     * Kiểm tra dữ liệu validateEmployeeInput.
+     *
+     * @param request tham số đầu vào của method
+     * @param isEditMode tham số đầu vào của method
+     * @return giá trị trả về sau khi xử lý
+     */
 
     private ErrorResponse validateEmployeeInput(EmployeeValidationRequest request, boolean isEditMode) {
         ErrorResponse errorResponse;
@@ -357,11 +374,12 @@ public class EmployeeValidator {
      */
     public ErrorResponse validateCertification(EmployeeValidationRequest request) {
         // Nếu không chọn chứng chỉ thì bỏ qua toàn bộ validate nhóm chứng chỉ.
-        if (request.getCertificationId() == null) {
+        String certificationId = request.getCertificationId();
+        if (certificationId == null) {
             return null;
         }
 
-        String certificationId = request.getCertificationId().trim();
+        certificationId = certificationId.trim();
         if (certificationId.isEmpty()) {
             return null;
         }
@@ -377,18 +395,21 @@ public class EmployeeValidator {
             }
         }
         String certificationStartDate = null;
-        if (request.getCertificationStartDate() != null) {
-            certificationStartDate = request.getCertificationStartDate().trim();
+        String certificationStartDateRaw = request.getCertificationStartDate();
+        if (certificationStartDateRaw != null) {
+            certificationStartDate = certificationStartDateRaw.trim();
         }
 
         String certificationEndDate = null;
-        if (request.getCertificationEndDate() != null) {
-            certificationEndDate = request.getCertificationEndDate().trim();
+        String certificationEndDateRaw = request.getCertificationEndDate();
+        if (certificationEndDateRaw != null) {
+            certificationEndDate = certificationEndDateRaw.trim();
         }
 
         String score = null;
-        if (request.getScore() != null) {
-            score = request.getScore().trim();
+        String scoreRaw = request.getScore();
+        if (scoreRaw != null) {
+            score = scoreRaw.trim();
         }
 
         // Kiểm tra chứng chỉ tồn tại và các field liên quan có đầy đủ, đúng format không.

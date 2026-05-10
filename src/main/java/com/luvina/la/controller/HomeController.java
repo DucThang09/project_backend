@@ -1,15 +1,17 @@
-package com.luvina.la.controller;
 /**
  * Copyright(C) 2026 Luvina Software Company
- * <p>
- * EmployeeController.java, April 13, 2026 tdthang
+ *
+ * HomeController.java, 10/05/2026 tdthang
  */
+package com.luvina.la.controller;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Controller xử lý endpoint kiểm tra trạng thái service.
  * Dùng để kiểm tra nhanh backend employee service đang hoạt động.
+ * @author tdthang
  */
 @RestController
 public class HomeController {

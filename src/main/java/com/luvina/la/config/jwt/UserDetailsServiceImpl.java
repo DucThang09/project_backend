@@ -28,10 +28,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         if (entity.isPresent()) {
             // Map role trong DB sang authority chuẩn của Spring Security.
-            String role = entity.get().getRole();
-            String authority = (role == null || role.isBlank())
-                    ? "ROLE_USER"
-                    : "ROLE_" + role.trim().toUpperCase(Locale.ROOT);
+            Integer role = entity.get().getRole();
+            String authority = (role != null && role == 1) ? "ROLE_ADMIN" : "ROLE_USER";
             roles = Collections.singleton(new SimpleGrantedAuthority(authority));
             return new AuthUserDetails(entity.get(), roles);
         } else {

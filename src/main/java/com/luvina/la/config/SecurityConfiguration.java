@@ -64,8 +64,8 @@ public class SecurityConfiguration {
                 // public endpoints
                 .antMatchers(Constants.ENDPOINTS_PUBLIC).permitAll()
                 // private endpoints with roles
-                .antMatchers(Constants.ENDPOINTS_WITH_ROLE).hasAnyRole("USER", "ADMIN")
-                .anyRequest().authenticated()
+                .antMatchers(Constants.ENDPOINTS_WITH_ROLE).hasRole("ADMIN")
+                .anyRequest().hasRole("ADMIN")
         );
 
         // Set unauthorized requests exception handler

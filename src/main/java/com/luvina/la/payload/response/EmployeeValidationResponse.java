@@ -1,9 +1,10 @@
-package com.luvina.la.payload.response;
 /**
  * Copyright(C) 2026 Luvina Software Company
- * <p>
- * EmployeeController.java, April 13, 2026 tdthang
+ *
+ * EmployeeValidationResponse.java, 10/05/2026 tdthang
  */
+package com.luvina.la.payload.response;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpStatus;
 
 /**
  * Payload trả về cho API validate/add/update employee.
+ * @author tdthang
  */
 @Getter
 @Setter
@@ -21,16 +23,13 @@ import org.springframework.http.HttpStatus;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EmployeeValidationResponse {
 
-    /** Mã trạng thái HTTP. */
     private Integer code;
-
     private Long employeeId;
-
     /** Message lỗi trả về khi request không hợp lệ. */
     private Message message;
-
     /**
      * Inner class chứa mã lỗi và tham số để format message.
+     * @author tdthang
      */
     @Getter
     @Setter
@@ -44,6 +43,7 @@ public class EmployeeValidationResponse {
 
     /**
      * Kết quả validate giữa validator và controller.
+     * @author tdthang
      */
     @Getter
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -55,14 +55,31 @@ public class EmployeeValidationResponse {
             this.code = code;
             this.params = params;
         }
+        /**
+         * Xử lý chức năng valid.
+         *
+         * @return giá trị trả về sau khi xử lý
+         */
 
         public static ErrorResponse valid() {
             return new ErrorResponse(String.valueOf(HttpStatus.OK.value()), List.of());
         }
+        /**
+         * Xử lý chức năng invalid.
+         *
+         * @param code tham số đầu vào của method
+         * @param params tham số đầu vào của method
+         * @return giá trị trả về sau khi xử lý
+         */
 
         public static ErrorResponse invalid(String code, List<String> params) {
             return new ErrorResponse(code, params != null ? params : List.of());
         }
+        /**
+         * Kiểm tra dữ liệu isValid.
+         *
+         * @return giá trị trả về sau khi xử lý
+         */
 
         public boolean isValid() {
             return String.valueOf(HttpStatus.OK.value()).equals(code);
@@ -79,6 +96,13 @@ public class EmployeeValidationResponse {
         response.setCode(HttpStatus.OK.value());
         return response;
     }
+    /**
+     * Tạo response thành công.
+     *
+     * @param employeeId tham số đầu vào của method
+     * @param messageCode tham số đầu vào của method
+     * @return giá trị trả về sau khi xử lý
+     */
 
     public static EmployeeValidationResponse success(Long employeeId, String messageCode) {
         EmployeeValidationResponse response = success();
@@ -88,17 +112,10 @@ public class EmployeeValidationResponse {
     }
 
     /**
-     * Táº¡o response thÃ nh cÃ´ng kÃ¨m message.
      *
-     * @param messageCode mÃ£ message tráº£ vá» cho frontend
-     * @return response vá»›i mÃ£ 200 vÃ  message
-     */
-    /**
-     * Tạo response lỗi.
-     *
-     * @param errorCode mã lỗi
-     * @param params tham số dùng để format message
-     * @return response với mã 500 và message lỗi
+     * @param errorCode
+     * @param params
+     * @return
      */
     public static EmployeeValidationResponse error(String errorCode, List<String> params) {
         EmployeeValidationResponse response = new EmployeeValidationResponse();

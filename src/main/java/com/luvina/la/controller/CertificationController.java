@@ -1,13 +1,13 @@
-package com.luvina.la.controller;
 /**
  * Copyright(C) 2026 Luvina Software Company
- * <p>
- * EmployeeController.java, April 13, 2026 tdthang
+ *
+ * CertificationController.java, 10/05/2026 tdthang
  */
+package com.luvina.la.controller;
+
 import com.luvina.la.dto.CertificationDTO;
 import com.luvina.la.payload.response.CertificationResponse;
 import com.luvina.la.service.CertificationService;
-import java.util.Collections;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,14 +17,13 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Controller xử lý API chứng chỉ.
  * Cung cấp danh sách chứng chỉ để màn hình thêm/sửa nhân viên sử dụng.
+ * @author tdthang
  */
 @RestController
 @RequestMapping("/certification")
 public class CertificationController {
 
-    /** Service xử lý nghiệp vụ lấy danh sách chứng chỉ. */
     private final CertificationService certificationService;
-
     /**
      * Constructor để inject service chứng chỉ.
      *
@@ -41,13 +40,7 @@ public class CertificationController {
      */
     @GetMapping
     public ResponseEntity<CertificationResponse> getCertifications() {
-        try {
-            List<CertificationDTO> certifications = certificationService.getCertifications();
-            return ResponseEntity.ok(CertificationResponse.success(certifications));
-        } catch (Exception exception) {
-            return ResponseEntity.ok(
-                    CertificationResponse.error("ER023", Collections.emptyList())
-            );
-        }
+        List<CertificationDTO> certifications = certificationService.getCertifications();
+        return ResponseEntity.ok(CertificationResponse.success(certifications));
     }
 }

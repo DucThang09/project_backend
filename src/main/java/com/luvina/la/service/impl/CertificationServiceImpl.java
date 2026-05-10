@@ -1,9 +1,10 @@
-package com.luvina.la.service.impl;
 /**
  * Copyright(C) 2026 Luvina Software Company
- * <p>
- * EmployeeController.java, April 13, 2026 tdthang
+ *
+ * CertificationServiceImpl.java, 10/05/2026 tdthang
  */
+package com.luvina.la.service.impl;
+
 import com.luvina.la.dto.CertificationDTO;
 import com.luvina.la.entity.Certification;
 import com.luvina.la.repository.CertificationRepository;
@@ -14,13 +15,12 @@ import org.springframework.stereotype.Service;
 
 /**
  * Implementation của CertificationService.
+ * @author tdthang
  */
 @Service
 public class CertificationServiceImpl implements CertificationService {
 
-    /** Repository để truy cập dữ liệu chứng chỉ. */
     private final CertificationRepository certificationRepository;
-
     /**
      * Constructor để inject dependencies.
      *
@@ -32,7 +32,7 @@ public class CertificationServiceImpl implements CertificationService {
 
     /**
      *
-     * @return
+     * @return giá trị trả về sau khi xử lý
      */
     @Override
     public List<CertificationDTO> getCertifications() {

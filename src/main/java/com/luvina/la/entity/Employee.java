@@ -1,9 +1,10 @@
-package com.luvina.la.entity;
 /**
  * Copyright(C) 2026 Luvina Software Company
- * <p>
- * EmployeeController.java, April 13, 2026 tdthang
+ *
+ * Employee.java, 10/05/2026 tdthang
  */
+package com.luvina.la.entity;
+
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
@@ -20,6 +21,12 @@ import javax.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+/**
+ * Mô tả chức năng của Employee.
+ *
+ * @author tdthang
+ */
 
 @Entity
 @Table(name = "employees")
@@ -61,7 +68,7 @@ public class Employee implements Serializable {
     private String employeeLoginPassword;
 
     @Column(name = "employee_role")
-    private String role;
+    private Integer role;
 
     @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)
     private List<EmployeeCertification> employeeCertifications;

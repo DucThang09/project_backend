@@ -1,9 +1,10 @@
-package com.luvina.la.payload.response;
 /**
  * Copyright(C) 2026 Luvina Software Company
- * <p>
- * EmployeeController.java, April 13, 2026 tdthang
+ *
+ * EmployeeDetailResponse.java, 10/05/2026 tdthang
  */
+package com.luvina.la.payload.response;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.luvina.la.dto.EmployeeDetailDTO;
 import java.util.List;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 /**
  * Payload trả về cho API lấy chi tiết nhân viên.
  * Dùng cho màn ADM003 và màn ADM004 khi mở ở mode chỉnh sửa.
+ * @author tdthang
  */
 @Getter
 @Setter
@@ -23,18 +25,15 @@ import org.springframework.http.HttpStatus;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EmployeeDetailResponse {
 
-    /** Mã kết quả xử lý API: 200 nếu thành công, 500 nếu có lỗi. */
     private Integer code;
-
     /** Thông tin chi tiết nhân viên trả về khi xử lý thành công. */
     private EmployeeDetailDTO employee;
-
     /** Thông tin message lỗi trả về khi xử lý thất bại. */
     private Message message;
-
     /**
      * Thông tin message lỗi trả về cho frontend.
      * Frontend dùng code và params để format nội dung lỗi hiển thị.
+     * @author tdthang
      */
     @Getter
     @Setter
@@ -42,19 +41,16 @@ public class EmployeeDetailResponse {
     @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Message {
-        /** Mã message lỗi, ví dụ ER023. */
         private String code;
-
         /** Danh sách tham số dùng để format message lỗi. */
         private List<String> params;
     }
-
     /**
-     * Tạo response thành công cho API chi tiết nhân viên.
-     *
-     * @param employee thông tin chi tiết nhân viên
-     * @return response với code 200 và dữ liệu nhân viên
-     */
+         * Tạo response thành công cho API chi tiết nhân viên.
+         *
+         * @param employee thông tin chi tiết nhân viên
+         * @return response với code 200 và dữ liệu nhân viên
+         */
     public static EmployeeDetailResponse success(EmployeeDetailDTO employee) {
         EmployeeDetailResponse response = new EmployeeDetailResponse();
         response.setCode(HttpStatus.OK.value());

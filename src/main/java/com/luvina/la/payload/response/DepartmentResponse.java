@@ -1,9 +1,10 @@
-package com.luvina.la.payload.response;
 /**
  * Copyright(C) 2026 Luvina Software Company
- * <p>
- * EmployeeController.java, April 13, 2026 tdthang
+ *
+ * DepartmentResponse.java, 10/05/2026 tdthang
  */
+package com.luvina.la.payload.response;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.luvina.la.dto.DepartmentDTO;
 import java.util.List;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus;
 
 /**
  * Payload trả về cho API danh sách phòng ban.
+ * @author tdthang
  */
 @Getter
 @Setter
@@ -22,17 +24,14 @@ import org.springframework.http.HttpStatus;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DepartmentResponse {
 
-    /** Mã trạng thái HTTP. */
     private Integer code;
-
     /** Danh sách phòng ban. */
     private List<DepartmentDTO> departments;
-
     /** Message lỗi hoặc mã message trả về từ backend. */
     private Message message;
-
     /**
      * Inner class chứa mã message và danh sách tham số.
+     * @author tdthang
      */
     @Getter
     @Setter

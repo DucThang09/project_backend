@@ -1,9 +1,10 @@
-package com.luvina.la.payload.response;
 /**
  * Copyright(C) 2026 Luvina Software Company
- * <p>
- * EmployeeController.java, April 13, 2026 tdthang
+ *
+ * EmployeeListResponse.java, 10/05/2026 tdthang
  */
+package com.luvina.la.payload.response;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.luvina.la.dto.EmployeeDTO;
 import java.util.List;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus;
 
 /**
  * Payload trả về cho API danh sách nhân viên.
+ * @author tdthang
  */
 @Getter
 @Setter
@@ -22,20 +24,16 @@ import org.springframework.http.HttpStatus;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EmployeeListResponse {
 
-    /** Mã trạng thái HTTP. */
     private Integer code;
-
     /** Tổng số bản ghi tìm được. */
     private Long totalRecords;
-
     /** Danh sách nhân viên trả về cho client. */
     private List<EmployeeDTO> employees;
-
     /** Message trả về trong các trường hợp đặc biệt hoặc lỗi. */
     private Message message;
-
     /**
      * Inner class chứa mã message và tham số để format.
+     * @author tdthang
      */
     @Getter
     @Setter
